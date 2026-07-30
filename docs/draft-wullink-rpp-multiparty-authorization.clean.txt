@@ -268,23 +268,23 @@ Table of Contents
 5.1.  Endpoints
 
    The following non normative table lists RPP endpoints related to
-   authorisation processes, each derived by applying the rules defined
+   authorization processes, each derived by applying the rules defined
    in section "HTTP Mapping Rules" in [I-D.ietf-rpp-core].
 
    +==============+======+=====================================================+
    |Operation     |HTTP  |URL path                                             |
    |              |Method|                                                     |
    +==============+======+=====================================================+
-   |Authorisation:|"POST"|"/{collection}/{id}/processes/authorisationProcesses"|
+   |Authorization:|"POST"|"/{collection}/{id}/processes/authorizationProcesses"|
    |create        |      |                                                     |
    +--------------+------+-----------------------------------------------------+
-   |Authorisation:|"GET" |"/{collection}/{id}/processes/authorisationProcesses/|
+   |Authorization:|"GET" |"/{collection}/{id}/processes/authorizationProcesses/|
    |read          |      |latest"                                              |
    +--------------+------+-----------------------------------------------------+
-   |Authorisation:|"GET" |"/{collection}/{id}/processes/                       |
-   |read          |      |authorisationProcesses/{id}"                         |
+   |Authorization:|"GET" |"/{collection}/{id}/processes/                       |
+   |read          |      |authorizationProcesses/{id}"                         |
    +--------------+------+-----------------------------------------------------+
-   |Authorisation:|"GET" |"/{collection}/{id}/processes/authorisationProcesses"|
+   |Authorization:|"GET" |"/{collection}/{id}/processes/authorizationProcesses"|
    |list          |      |                                                     |
    +--------------+------+-----------------------------------------------------+
 
@@ -559,7 +559,7 @@ Table of Contents
    Each party involved in the multi-party authorization flow MUST
    provide at least 1 public key at the registry.
 
-   *TODO*: Use the Organisation type?
+   *TODO*: Use the Organization type?
 
    {
    ...

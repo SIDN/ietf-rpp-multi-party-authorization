@@ -171,29 +171,29 @@ The steps in the diagram are as follows:
 
 **TODO**
 
-## Authorisation Data Object
+## Authorization Data Object
 
-### Elements {#authorisation-elements}
+### Elements {#authorization-elements}
 
-This section describes the data elements of the Authorisation Data Object, as defined in [@!I-D.ietf-rpp-data-objects].
+This section describes the data elements of the Authorization Data Object, as defined in [@!I-D.ietf-rpp-data-objects].
 
-- `transactionType`: The type of transaction for the authorisation request. MUST be one of the values registered in the "RPP Multi-Party Transaction Types" registry (#tbl-rpp-transaction-types). Every transaction type is associated with a specific RPP operation, and the `data` property of the authorisation request MUST contain the RPP request body for that operation.
-- `id`: The identifier for the authorisation request.
-- `timestamp`: The time the authorisation request was created.
-- `expiration`: The time the authorisation request expires. MUST be later than `timestamp`.
-- `objectId`: The identifier of the object the authorisation request pertains to.
-- `requestorId`: The unique organisation identifier of the requestor.
+- `transactionType`: The type of transaction for the authorization request. MUST be one of the values registered in the "RPP Multi-Party Transaction Types" registry (#tbl-rpp-transaction-types). Every transaction type is associated with a specific RPP operation, and the `data` property of the authorization request MUST contain the RPP request body for that operation.
+- `id`: The identifier for the authorization request.
+- `timestamp`: The time the authorization request was created.
+- `expiration`: The time the authorization request expires. MUST be later than `timestamp`.
+- `objectId`: The identifier of the object the authorization request pertains to.
+- `requestorId`: The unique organization identifier of the requestor.
 - `requestorName`: The name of the requestor.
-- `approvalUrl`: The URI to which the client should be redirected for multi-party approval. MUST only be used when the referenced organisation is a registrar or reseller supporting multi-party approval.
-- `returnUrl`: The URI to which the client should be redirected after multi-party approval at the registrar. MUST only be used when the referenced organisation is a 3rd party supporting multi-party approval.
-- `usage`: The usage type for the authorisation request. MUST be one of `"single-use"` or `"multi-use"`.
-- `data`: The data associated with the authorisation request, containing the RPP request body for the operation identified by `transactionType`; MUST be a valid RPP Data Object, see (#transaction-types).
-- `signatures`: The digital signatures applied to the authorisation request, used to verify its authenticity and integrity, see (#transaction-signing-and-verification).
-- `approval`: The approval information for the authorisation request.
+- `approvalUrl`: The URI to which the client should be redirected for multi-party approval. MUST only be used when the referenced organization is a registrar or reseller supporting multi-party approval.
+- `returnUrl`: The URI to which the client should be redirected after multi-party approval at the registrar. MUST only be used when the referenced organization is a 3rd party supporting multi-party approval.
+- `usage`: The usage type for the authorization request. MUST be one of `"single-use"` or `"multi-use"`.
+- `data`: The data associated with the authorization request, containing the RPP request body for the operation identified by `transactionType`; MUST be a valid RPP Data Object, see (#transaction-types).
+- `signatures`: The digital signatures applied to the authorization request, used to verify its authenticity and integrity, see (#transaction-signing-and-verification).
+- `approval`: The approval information for the authorization request.
 
-### Usage of elements by parties {#authorisation-party-usage}
+### Usage of elements by parties {#authorization-party-usage}
 
-The Authorisation Data Object elements are set by different parties involved in the multi-party authorization flow, and read by others as needed to process or verify the transaction.
+The Authorization Data Object elements are set by different parties involved in the multi-party authorization flow, and read by others as needed to process or verify the transaction.
 
 | Identifier | Set by | Read by |
 |---|---|---|
@@ -211,21 +211,21 @@ The Authorisation Data Object elements are set by different parties involved in 
 | `signatures` | Registry, Registrar | Registry, Registrar |
 | `approval` | Registrar | Registry, 3rd party |
 Table: Party responsible for setting and reading each data element
-{#tbl-authorisation-party-usage}
+{#tbl-authorization-party-usage}
 
 ### JSON Schema
 
-This section provides normative JSON Schema definitions for the transaction types defined in this document. All schemas use JSON Schema draft 2020-12 [@?JSON-SCHEMA]. The schema below represents the Authorisation Data Object defined in [@!I-D.ietf-rpp-data-objects] and described in (#authorisation-elements).
+This section provides normative JSON Schema definitions for the transaction types defined in this document. All schemas use JSON Schema draft 2020-12 [@?JSON-SCHEMA]. The schema below represents the Authorization Data Object defined in [@!I-D.ietf-rpp-data-objects] and described in (#authorization-elements).
 
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$ref": "#/$defs/authorisation.create",
+  "$ref": "#/$defs/authorization.create",
   "$defs": {
-    "authorisation.create": {
+    "authorization.create": {
       "type": "object",
       "properties": {
-        "@type": { "type": "string", "const": "authorisation" },
+        "@type": { "type": "string", "const": "authorization" },
         "transactionType": { "type": "string", "enum": ["rpp:mpa-type:dns-update", "rpp:mpa-type:transfer"] },
         "id": { "type": "string" },
         "timestamp": { "type": "string", "format": "date-time" },
@@ -413,14 +413,14 @@ The following example shows a discovery document with 2 registry public keys:
 
 ## Endpoints
 
-The following non normative table lists RPP endpoints related to authorisation processes, each derived by applying the rules defined in section "HTTP Mapping Rules" in [@!I-D.ietf-rpp-core].
+The following non normative table lists RPP endpoints related to authorization processes, each derived by applying the rules defined in section "HTTP Mapping Rules" in [@!I-D.ietf-rpp-core].
 
 | Operation | HTTP Method | URL path |
 |---|---|---|
-| Authorisation: create | `"POST"` | `"/{collection}/{id}/processes/authorisationProcesses"` |
-| Authorisation: read | `"GET"` | `"/{collection}/{id}/processes/authorisationProcesses/latest"` |
-| Authorisation: read | `"GET"` | `"/{collection}/{id}/processes/authorisationProcesses/{id}"` |
-| Authorisation: list | `"GET"` | `"/{collection}/{id}/processes/authorisationProcesses"` |
+| Authorization: create | `"POST"` | `"/{collection}/{id}/processes/authorizationProcesses"` |
+| Authorization: read | `"GET"` | `"/{collection}/{id}/processes/authorizationProcesses/latest"` |
+| Authorization: read | `"GET"` | `"/{collection}/{id}/processes/authorizationProcesses/{id}"` |
+| Authorization: list | `"GET"` | `"/{collection}/{id}/processes/authorizationProcesses"` |
 
 **TODO**
 
@@ -463,12 +463,12 @@ return-url = 1*CHAR
 
 ## Key provisioning
 
-Each party involved in the multi-party authorization flow MUST provide at least 1 public key at the registry. Public keys are provisioned by adding a Public Key Object to the `publicKeys` property of the party's Organisation Data Object [@!I-D.ietf-rpp-data-objects], using an RPP JSON partial update (JSON Patch, as defined in the Partial Update rules of [@!I-D.ietf-rpp-json]). Since `publicKeys` is a `DictionaryComposition[Public Key Object]`, adding a new key MUST be done using an `add` operation whose `path` targets the new key identifier directly; the `match` property is not used, as it only applies to array-valued properties.
+Each party involved in the multi-party authorization flow MUST provide at least 1 public key at the registry. Public keys are provisioned by adding a Public Key Object to the `publicKeys` property of the party's Organization Data Object [@!I-D.ietf-rpp-data-objects], using an RPP JSON partial update (JSON Patch, as defined in the Partial Update rules of [@!I-D.ietf-rpp-json]). Since `publicKeys` is a `DictionaryComposition[Public Key Object]`, adding a new key MUST be done using an `add` operation whose `path` targets the new key identifier directly; the `match` property is not used, as it only applies to array-valued properties.
 
-The following example shows a partial update request adding an RSA public key with identifier `registrar-key-3` to the `publicKeys` property of the Organisation Data Object with id `ORG-12345`:
+The following example shows a partial update request adding an RSA public key with identifier `registrar-key-3` to the `publicKeys` property of the Organization Data Object with id `ORG-12345`:
 
 ```http
-PATCH /organisations/me HTTP/1.1
+PATCH /organizations/me HTTP/1.1
 Authorization: Bearer <access-token>
 Content-Type: application/json
 [
@@ -497,7 +497,7 @@ replacing the existing nameservers with `ns1.dns.example` and `ns2.dns.example` 
 
 ```json
 {
-  "@type": "authorisation",
+  "@type": "authorization",
   "transactionType": "rpp:mpa-type:dns-update",
   "timestamp": "2027-06-01T12:00:00Z",
   "expiration": "2027-06-01T12:10:00Z",
@@ -547,7 +547,7 @@ Example 3rd party request to registry to transfer the management of a domain obj
 
 ```json
 {
-  "@type": "authorisation",
+  "@type": "authorization",
   "transactionType": "rpp:mpa-type:transfer",
   "id": "TR-12345",
   "timestamp": "2027-06-01T12:00:00Z",
@@ -566,7 +566,7 @@ The registry adds the following fields to the request: `id`, `requestorId`, `req
 
 ```json
 {
-  "@type": "authorisation",
+  "@type": "authorization",
   "transactionType": "rpp:mpa-type:transfer",
   "id": "TR-12345",
   "timestamp": "2027-06-01T12:00:00Z",
@@ -593,7 +593,7 @@ This response is sent to the registry to request execution of the transfer:
 
 ```json
 {
-  "@type": "authorisation",
+  "@type": "authorization",
   "transactionType": "rpp:mpa-type:transfer",
   "id": "TR-12345",
   "timestamp": "2027-06-01T12:00:00Z",

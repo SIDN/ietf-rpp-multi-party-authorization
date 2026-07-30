@@ -1320,7 +1320,7 @@ li > p:last-of-type:only-child {
             <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-architectural-overview" class="internal xref">Architectural Overview</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
-            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-authorisation-data-object" class="internal xref">Authorisation Data Object</a></p>
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-authorization-data-object" class="internal xref">Authorization Data Object</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
                 <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-elements" class="internal xref">Elements</a></p>
@@ -1607,67 +1607,67 @@ li > p:last-of-type:only-child {
       </ol>
 </section>
 </div>
-<div id="authorisation-data-object">
+<div id="authorization-data-object">
 <section id="section-5">
-      <h2 id="name-authorisation-data-object">
-<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-authorisation-data-object" class="section-name selfRef">Authorisation Data Object</a>
+      <h2 id="name-authorization-data-object">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-authorization-data-object" class="section-name selfRef">Authorization Data Object</a>
       </h2>
-<div id="authorisation-elements">
+<div id="authorization-elements">
 <section id="section-5.1">
         <h3 id="name-elements">
 <a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-elements" class="section-name selfRef">Elements</a>
         </h3>
-<p id="section-5.1-1">This section describes the data elements of the Authorisation Data Object, as defined in <span>[<a href="#I-D.ietf-rpp-data-objects" class="cite xref">I-D.ietf-rpp-data-objects</a>]</span>.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-1">This section describes the data elements of the Authorization Data Object, as defined in <span>[<a href="#I-D.ietf-rpp-data-objects" class="cite xref">I-D.ietf-rpp-data-objects</a>]</span>.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
 <ul class="compact">
 <li class="compact" id="section-5.1-2.1">
-            <code>transactionType</code>: The type of transaction for the authorisation request. MUST be one of the values registered in the "RPP Multi-Party Transaction Types" registry <a href="#tbl-rpp-transaction-types" class="auto internal xref">Table 5</a>. Every transaction type is associated with a specific RPP operation, and the <code>data</code> property of the authorisation request MUST contain the RPP request body for that operation.<a href="#section-5.1-2.1" class="pilcrow">¶</a>
+            <code>transactionType</code>: The type of transaction for the authorization request. MUST be one of the values registered in the "RPP Multi-Party Transaction Types" registry <a href="#tbl-rpp-transaction-types" class="auto internal xref">Table 5</a>. Every transaction type is associated with a specific RPP operation, and the <code>data</code> property of the authorization request MUST contain the RPP request body for that operation.<a href="#section-5.1-2.1" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.2">
-            <code>id</code>: The identifier for the authorisation request.<a href="#section-5.1-2.2" class="pilcrow">¶</a>
+            <code>id</code>: The identifier for the authorization request.<a href="#section-5.1-2.2" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.3">
-            <code>timestamp</code>: The time the authorisation request was created.<a href="#section-5.1-2.3" class="pilcrow">¶</a>
+            <code>timestamp</code>: The time the authorization request was created.<a href="#section-5.1-2.3" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.4">
-            <code>expiration</code>: The time the authorisation request expires. MUST be later than <code>timestamp</code>.<a href="#section-5.1-2.4" class="pilcrow">¶</a>
+            <code>expiration</code>: The time the authorization request expires. MUST be later than <code>timestamp</code>.<a href="#section-5.1-2.4" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.5">
-            <code>objectId</code>: The identifier of the object the authorisation request pertains to.<a href="#section-5.1-2.5" class="pilcrow">¶</a>
+            <code>objectId</code>: The identifier of the object the authorization request pertains to.<a href="#section-5.1-2.5" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.6">
-            <code>requestorId</code>: The unique organisation identifier of the requestor.<a href="#section-5.1-2.6" class="pilcrow">¶</a>
+            <code>requestorId</code>: The unique organization identifier of the requestor.<a href="#section-5.1-2.6" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.7">
             <code>requestorName</code>: The name of the requestor.<a href="#section-5.1-2.7" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.8">
-            <code>approvalUrl</code>: The URI to which the client should be redirected for multi-party approval. MUST only be used when the referenced organisation is a registrar or reseller supporting multi-party approval.<a href="#section-5.1-2.8" class="pilcrow">¶</a>
+            <code>approvalUrl</code>: The URI to which the client should be redirected for multi-party approval. MUST only be used when the referenced organization is a registrar or reseller supporting multi-party approval.<a href="#section-5.1-2.8" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.9">
-            <code>returnUrl</code>: The URI to which the client should be redirected after multi-party approval at the registrar. MUST only be used when the referenced organisation is a 3rd party supporting multi-party approval.<a href="#section-5.1-2.9" class="pilcrow">¶</a>
+            <code>returnUrl</code>: The URI to which the client should be redirected after multi-party approval at the registrar. MUST only be used when the referenced organization is a 3rd party supporting multi-party approval.<a href="#section-5.1-2.9" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.10">
-            <code>usage</code>: The usage type for the authorisation request. MUST be one of <code>"single-use"</code> or <code>"multi-use"</code>.<a href="#section-5.1-2.10" class="pilcrow">¶</a>
+            <code>usage</code>: The usage type for the authorization request. MUST be one of <code>"single-use"</code> or <code>"multi-use"</code>.<a href="#section-5.1-2.10" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.11">
-            <code>data</code>: The data associated with the authorisation request, containing the RPP request body for the operation identified by <code>transactionType</code>; MUST be a valid RPP Data Object, see <a href="#transaction-types" class="auto internal xref">Section 9</a>.<a href="#section-5.1-2.11" class="pilcrow">¶</a>
+            <code>data</code>: The data associated with the authorization request, containing the RPP request body for the operation identified by <code>transactionType</code>; MUST be a valid RPP Data Object, see <a href="#transaction-types" class="auto internal xref">Section 9</a>.<a href="#section-5.1-2.11" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.12">
-            <code>signatures</code>: The digital signatures applied to the authorisation request, used to verify its authenticity and integrity, see <a href="#transaction-signing-and-verification" class="auto internal xref">Section 7</a>.<a href="#section-5.1-2.12" class="pilcrow">¶</a>
+            <code>signatures</code>: The digital signatures applied to the authorization request, used to verify its authenticity and integrity, see <a href="#transaction-signing-and-verification" class="auto internal xref">Section 7</a>.<a href="#section-5.1-2.12" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.1-2.13">
-            <code>approval</code>: The approval information for the authorisation request.<a href="#section-5.1-2.13" class="pilcrow">¶</a>
+            <code>approval</code>: The approval information for the authorization request.<a href="#section-5.1-2.13" class="pilcrow">¶</a>
 </li>
         </ul>
 </section>
 </div>
-<div id="authorisation-party-usage">
+<div id="authorization-party-usage">
 <section id="section-5.2">
         <h3 id="name-usage-of-elements-by-partie">
 <a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-usage-of-elements-by-partie" class="section-name selfRef">Usage of elements by parties</a>
         </h3>
-<p id="section-5.2-1">The Authorisation Data Object elements are set by different parties involved in the multi-party authorization flow, and read by others as needed to process or verify the transaction.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
-<span id="name-party-responsible-for-setti"></span><div id="tbl-authorisation-party-usage">
+<p id="section-5.2-1">The Authorization Data Object elements are set by different parties involved in the multi-party authorization flow, and read by others as needed to process or verify the transaction.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<span id="name-party-responsible-for-setti"></span><div id="tbl-authorization-party-usage">
 <table class="center" id="table-1">
           <caption>
 <a href="#table-1" class="selfRef">Table 1</a>:
@@ -1782,16 +1782,16 @@ li > p:last-of-type:only-child {
         <h3 id="name-json-schema">
 <a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-json-schema" class="section-name selfRef">JSON Schema</a>
         </h3>
-<p id="section-5.3-1">This section provides normative JSON Schema definitions for the transaction types defined in this document. All schemas use JSON Schema draft 2020-12 <span>[<a href="#JSON-SCHEMA" class="cite xref">JSON-SCHEMA</a>]</span>. The schema below represents the Authorisation Data Object defined in <span>[<a href="#I-D.ietf-rpp-data-objects" class="cite xref">I-D.ietf-rpp-data-objects</a>]</span> and described in <a href="#authorisation-elements" class="auto internal xref">Section 5.1</a>.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-1">This section provides normative JSON Schema definitions for the transaction types defined in this document. All schemas use JSON Schema draft 2020-12 <span>[<a href="#JSON-SCHEMA" class="cite xref">JSON-SCHEMA</a>]</span>. The schema below represents the Authorization Data Object defined in <span>[<a href="#I-D.ietf-rpp-data-objects" class="cite xref">I-D.ietf-rpp-data-objects</a>]</span> and described in <a href="#authorization-elements" class="auto internal xref">Section 5.1</a>.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
 <div class="breakable lang-json sourcecode" id="section-5.3-2">
 <pre>{
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$ref": "#/$defs/authorisation.create",
+  "$ref": "#/$defs/authorization.create",
   "$defs": {
-    "authorisation.create": {
+    "authorization.create": {
       "type": "object",
       "properties": {
-        "@type": { "type": "string", "const": "authorisation" },
+        "@type": { "type": "string", "const": "authorization" },
         "transactionType": { "type": "string", "enum": ["rpp:mpa-type:dns-update", "rpp:mpa-type:transfer"] },
         "id": { "type": "string" },
         "timestamp": { "type": "string", "format": "date-time" },
@@ -2052,7 +2052,7 @@ li > p:last-of-type:only-child {
         <h3 id="name-endpoints">
 <a href="#section-11.1" class="section-number selfRef">11.1. </a><a href="#name-endpoints" class="section-name selfRef">Endpoints</a>
         </h3>
-<p id="section-11.1-1">The following non normative table lists RPP endpoints related to authorisation processes, each derived by applying the rules defined in section "HTTP Mapping Rules" in <span>[<a href="#I-D.ietf-rpp-core" class="cite xref">I-D.ietf-rpp-core</a>]</span>.<a href="#section-11.1-1" class="pilcrow">¶</a></p>
+<p id="section-11.1-1">The following non normative table lists RPP endpoints related to authorization processes, each derived by applying the rules defined in section "HTTP Mapping Rules" in <span>[<a href="#I-D.ietf-rpp-core" class="cite xref">I-D.ietf-rpp-core</a>]</span>.<a href="#section-11.1-1" class="pilcrow">¶</a></p>
 <table class="center" id="table-2">
           <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
 <thead>
@@ -2064,39 +2064,39 @@ li > p:last-of-type:only-child {
           </thead>
           <tbody>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">Authorisation: create</td>
+              <td class="text-left" rowspan="1" colspan="1">Authorization: create</td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>"POST"</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>"/{collection}/{id}/processes/authorisationProcesses"</code>
+                <code>"/{collection}/{id}/processes/authorizationProcesses"</code>
 </td>
             </tr>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">Authorisation: read</td>
+              <td class="text-left" rowspan="1" colspan="1">Authorization: read</td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>"GET"</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>"/{collection}/{id}/processes/authorisationProcesses/latest"</code>
+                <code>"/{collection}/{id}/processes/authorizationProcesses/latest"</code>
 </td>
             </tr>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">Authorisation: read</td>
+              <td class="text-left" rowspan="1" colspan="1">Authorization: read</td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>"GET"</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>"/{collection}/{id}/processes/authorisationProcesses/{id}"</code>
+                <code>"/{collection}/{id}/processes/authorizationProcesses/{id}"</code>
 </td>
             </tr>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">Authorisation: list</td>
+              <td class="text-left" rowspan="1" colspan="1">Authorization: list</td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>"GET"</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>"/{collection}/{id}/processes/authorisationProcesses"</code>
+                <code>"/{collection}/{id}/processes/authorizationProcesses"</code>
 </td>
             </tr>
           </tbody>
@@ -2158,10 +2158,10 @@ return-url = 1*CHAR
         <h3 id="name-key-provisioning">
 <a href="#section-12.1" class="section-number selfRef">12.1. </a><a href="#name-key-provisioning" class="section-name selfRef">Key provisioning</a>
         </h3>
-<p id="section-12.1-1">Each party involved in the multi-party authorization flow MUST provide at least 1 public key at the registry. Public keys are provisioned by adding a Public Key Object to the <code>publicKeys</code> property of the party's Organisation Data Object <span>[<a href="#I-D.ietf-rpp-data-objects" class="cite xref">I-D.ietf-rpp-data-objects</a>]</span>, using an RPP JSON partial update (JSON Patch, as defined in the Partial Update rules of <span>[<a href="#I-D.ietf-rpp-json" class="cite xref">I-D.ietf-rpp-json</a>]</span>). Since <code>publicKeys</code> is a <code>DictionaryComposition[Public Key Object]</code>, adding a new key MUST be done using an <code>add</code> operation whose <code>path</code> targets the new key identifier directly; the <code>match</code> property is not used, as it only applies to array-valued properties.<a href="#section-12.1-1" class="pilcrow">¶</a></p>
-<p id="section-12.1-2">The following example shows a partial update request adding an RSA public key with identifier <code>registrar-key-3</code> to the <code>publicKeys</code> property of the Organisation Data Object with id <code>ORG-12345</code>:<a href="#section-12.1-2" class="pilcrow">¶</a></p>
+<p id="section-12.1-1">Each party involved in the multi-party authorization flow MUST provide at least 1 public key at the registry. Public keys are provisioned by adding a Public Key Object to the <code>publicKeys</code> property of the party's Organization Data Object <span>[<a href="#I-D.ietf-rpp-data-objects" class="cite xref">I-D.ietf-rpp-data-objects</a>]</span>, using an RPP JSON partial update (JSON Patch, as defined in the Partial Update rules of <span>[<a href="#I-D.ietf-rpp-json" class="cite xref">I-D.ietf-rpp-json</a>]</span>). Since <code>publicKeys</code> is a <code>DictionaryComposition[Public Key Object]</code>, adding a new key MUST be done using an <code>add</code> operation whose <code>path</code> targets the new key identifier directly; the <code>match</code> property is not used, as it only applies to array-valued properties.<a href="#section-12.1-1" class="pilcrow">¶</a></p>
+<p id="section-12.1-2">The following example shows a partial update request adding an RSA public key with identifier <code>registrar-key-3</code> to the <code>publicKeys</code> property of the Organization Data Object with id <code>ORG-12345</code>:<a href="#section-12.1-2" class="pilcrow">¶</a></p>
 <div class="lang-http sourcecode" id="section-12.1-3">
-<pre>PATCH /organisations/me HTTP/1.1
+<pre>PATCH /organizations/me HTTP/1.1
 Authorization: Bearer &lt;access-token&gt;
 Content-Type: application/json
 [
@@ -2194,7 +2194,7 @@ Content-Type: application/json
 replacing the existing nameservers with <code>ns1.dns.example</code> and <code>ns2.dns.example</code> and replacing the existing DS records with a new DS record with key tag <code>12345</code>:<a href="#section-12.2-1" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-12.2-2">
 <pre>{
-  "@type": "authorisation",
+  "@type": "authorization",
   "transactionType": "rpp:mpa-type:dns-update",
   "timestamp": "2027-06-01T12:00:00Z",
   "expiration": "2027-06-01T12:10:00Z",
@@ -2246,7 +2246,7 @@ and also create 2 separate transaction types, one for replacing nameservers and 
 <p id="section-12.3-1">Example 3rd party request to registry to transfer the management of a domain object, signed by the 3rd party. The <code>data</code> property contains a Transfer Process Object create request body as defined in <span>[<a href="#I-D.ietf-rpp-json" class="cite xref">I-D.ietf-rpp-json</a>]</span>:<a href="#section-12.3-1" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-12.3-2">
 <pre>{
-  "@type": "authorisation",
+  "@type": "authorization",
   "transactionType": "rpp:mpa-type:transfer",
   "id": "TR-12345",
   "timestamp": "2027-06-01T12:00:00Z",
@@ -2264,7 +2264,7 @@ and also create 2 separate transaction types, one for replacing nameservers and 
 <p id="section-12.3-4">The registry adds the following fields to the request: <code>id</code>, <code>requestorId</code>, <code>requestorName</code>, <code>registrySig</code>, and <code>registryKeyId</code>. The <code>id</code> is a unique identifier for the transaction, the <code>requestorName</code> is the public name of the requestor to be displayed in the consent screen, the <code>registrySig</code> is the signature of the registry, and the <code>registryKeyId</code> is the identifier of the public key used by the registry to sign the request.<a href="#section-12.3-4" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-12.3-5">
 <pre>{
-  "@type": "authorisation",
+  "@type": "authorization",
   "transactionType": "rpp:mpa-type:transfer",
   "id": "TR-12345",
   "timestamp": "2027-06-01T12:00:00Z",
@@ -2290,7 +2290,7 @@ and also create 2 separate transaction types, one for replacing nameservers and 
 <p id="section-12.3-7">This response is sent to the registry to request execution of the transfer:<a href="#section-12.3-7" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-12.3-8">
 <pre>{
-  "@type": "authorisation",
+  "@type": "authorization",
   "transactionType": "rpp:mpa-type:transfer",
   "id": "TR-12345",
   "timestamp": "2027-06-01T12:00:00Z",
