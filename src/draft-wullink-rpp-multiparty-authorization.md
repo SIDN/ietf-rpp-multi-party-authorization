@@ -10,7 +10,7 @@ date = 2026-11-14
 
 [seriesInfo]
 name = "Internet-Draft"
-value = "draft-wullink-rpp-multiparty-authorization-00"
+value = "draft-wullink-rpp-multi-party-authorization-00"
 stream = "IETF"
 status = "standard"
 
