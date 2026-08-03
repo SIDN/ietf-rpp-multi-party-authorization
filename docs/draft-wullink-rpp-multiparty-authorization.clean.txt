@@ -62,32 +62,53 @@ Table of Contents
    2.  Terminology
    3.  Conventions Used in This Document
    4.  Architectural Overview
-   5.  HTTP
-     5.1.  Endpoints
-     5.2.  Approval Header
-   6.  Public Keys
-   7.  Approval Redirect URLs
-   8.  Transaction signing and verification
-     8.1.  Canonicalization and Signing Input
-     8.2.  Registry
-     8.3.  Registrar
-   9.  Transaction Types
-     9.1.  DNS Update Transaction Type
-     9.2.  Transfer Transaction Type
-     9.3.  JSON Schema
+   5.  Data Objects
+     5.1.  Component Data Objects
+       5.1.1.  Public Key Data Object
+       5.1.2.  Signature Data Object
+       5.1.3.  Approval Data Object
+     5.2.  Authorisation Data Object
+       5.2.1.  Elements
+       5.2.2.  Usage of elements by parties
+       5.2.3.  JSON Schema
+     5.3.  Organization Data Object
+       5.3.1.  Approval Redirect URL
+       5.3.2.  Return Redirect URL
+   6.  Request Processing
+     6.1.  Third Party
+     6.2.  Registry
+     6.3.  Registrar
+   7.  Request Signing and Verification
+     7.1.  Public Keys
+       7.1.1.  JSON Schema
+     7.2.  Canonicalization and Signing Input
+     7.3.  Registry
+     7.4.  Registrar
+   8.  Transaction Types
+     8.1.  Domain Name Server Update
+     8.2.  Domain DNSSEC Update
+     8.3.  Domain Transfer
+   9.  HTTP
+     9.1.  Endpoints
+     9.2.  Request Header
+     9.3.  Return Header
    10. Examples
      10.1.  Key provisioning
-     10.2.  Domain Update Request
-     10.3.  Domain Transfer Request
+     10.2.  Redirection URL management
+     10.3.  Domain Name Server Update Request
+     10.4.  Domain DNSSEC Update Request
+     10.5.  Domain Transfer Request
    11. Security Considerations
-   12. IANA Considerations
-   13. Internationalization Considerations
-   14. Privacy Considerations
-   15. Change History
-     15.1.  Version 00
-   16. References
-     16.1.  Normative References
-     16.2.  Informative References
+   12. RPP result codes
+     12.1.  Client Errors
+     12.2.  Server Errors
+   13. IANA Considerations
+   14. Internationalization Considerations
+   15. Privacy Considerations
+   16. Change History
+   17. References
+     17.1.  Normative References
+     17.2.  Informative References
    Acknowledgements
    Authors' Addresses
 
@@ -142,12 +163,11 @@ Table of Contents
    The authorization of such a delegated operation requires the explicit
    participation of four parties: the registrant's client, the third
    party performing the operation, the registry, and the registrar of
-   record.  Each of the three service providers (third party, registry,
-   and registrar) applies its own digital signature to the authorization
-   request, so that the operation can only be executed once all three
-   signatures have been collected and verified.  This prevents any
-   single party from unilaterally authorizing a sensitive domain
-   management operation.
+   record.  The registry and the registrar each apply their own digital
+   signature to the authorization request, so that the operation can
+   only be executed once both signatures have been collected and
+   verified.  This prevents any single party from unilaterally
+   authorizing a sensitive domain management operation.
 
    The following diagram illustrates the multi-party authorization flow:
 
@@ -159,14 +179,14 @@ Table of Contents
         |  operation    |               |               |
         +-------------->|               |               |
         |               |               |               |
-        |               | 2. Create and |               |
-        |               |  sign request |               |
+        |               | 2. Create     |               |
+        |               |    request    |               |
         |               |               |               |
-        |               | 3. Send signed|               |
+        |               | 3. Send       |               |
         |               |  request      |               |
         |               +-------------->|               |
         |               |               |               |
-        |               | 4. Counter-   |               |
+        |               | 4.            |               |
         |               |  signed req. +|               |
         |               |  registrar    |               |
         |               |  redirect URL |               |
@@ -174,8 +194,8 @@ Table of Contents
         |               |               |               |
         | 5. Redirect   |               |               |
         |  to registrar |               |               |
-        |  URL (doubly- |               |               |
-        |  signed req.) |               |               |
+        |  URL          |               |               |
+        |               |               |               |
         |<--------------|               |               |
         |               |               |               |
         | 6. Follow     |               |               |
@@ -189,9 +209,9 @@ Table of Contents
         | 7. Redirect   |               |               |
         |  back with    |               |               |
         |  request      |               |               |
-        |  signed by    |               |               |
-        |  all three    |               |               |
-        |  parties      |               |               |
+        |               |               |               |
+        |               |               |               |
+        |               |               |               |
         |<-----------------------------------------------|
         |               |               |               |
         | 8. Follow     |               |               |
@@ -200,9 +220,6 @@ Table of Contents
         |               |               |               |
         |               | 9. Submit     |               |
         |               |  request      |               |
-        |               |  signed by    |               |
-        |               |  all three    |               |
-        |               |  parties      |               |
         |               +-------------->|               |
         |               |               |               |
         |               |               | 10. Verify all|
@@ -213,7 +230,12 @@ Table of Contents
         |               |  result       |               |
         |               |<--------------|               |
         |               |               |               |
-        | 12. Operation |               |               |
+        |               |               | 12. Inform    |
+        |               |               |  registrar of |
+        |               |               |  result       |
+        |               |               +-------------->|
+        |               |               |               |
+        | 13. Operation |               |               |
         |  confirmed    |               |               |
         |<--------------|               |               |
         |               |               |               |
@@ -226,102 +248,284 @@ Table of Contents
         management operation that requires authorization from the
         registry and the registrar.
    2.   The third party's backend constructs a request describing the
-        requested operation and signs it, expressing the third party's
-        intent to perform the operation on behalf of the registrant.
-   3.   The third party sends the signed request to the registry over a
-        direct, back-channel connection.
-   4.   The registry validates the third party's signature and, provided
-        the third party is accredited to act on the object, adds its own
-        signature.  The registry returns the request, now signed by both
-        the third party and the registry, together with the URL of the
+        requested operation, expressing the third party's intent to
+        perform the operation on behalf of the registrant.
+   3.   The third party sends the request to the RPP authorization
+        endpoint.
+   4.   The registry checks if the third party is accredited to act on
+        the object and validates the request, then it signs the request.
+        The registry returns the request, together with the URL of the
         registrar's web-based consent screen to which the third party
         must redirect the client's browser for transaction approval.
    5.   The third party redirects the client's browser to the
         registrar's consent screen at the URL provided by the registry,
-        conveying the doubly-signed request as a parameter of the
-        redirect.
+        conveying the signed request as a parameter of the redirect.
    6.   The client's browser follows the redirect to the registrar.  The
-        registrar validates the signatures of both the third party and
-        the registry, and presents the requested operation to the
-        registrant for approval.  If the registrant approves, the
-        registrar adds its own signature, producing a request signed by
-        all three parties.
+        registrar validates the signature of the registry, and presents
+        the requested operation to the registrant for approval.  If the
+        registrant approves, the registrar adds its own signature.
    7.   The registrar redirects the client's browser back to the third
-        party, conveying the request signed by all three parties as a
-        parameter of the redirect.
+        party.
    8.   The client's browser follows the redirect, delivering the
-        request signed by all three parties to the third party.
-   9.   The third party submits the request signed by all three parties
-        to the registry over a direct, back-channel connection, to
-        request execution of the operation.
-   10.  The registry verifies the signatures of the third party, the
-        registry itself, and the registrar.  The registry executes the
-        requested operation only if all three signatures are present and
-        valid.
+        request signed by the registry and the registrar to the third
+        party.
+   9.   The third party submits the request for the RPP operation to the
+        registry, attaching the fully-signed authorisation request in
+        the RPP-Multi-Party-Auth HTTP header.
+   10.  The registry verifies the signatures of the registry itself and
+        the registrar.  The registry executes the requested operation
+        only if both signatures are present and valid.
    11.  The registry returns the result of the operation to the third
         party.
-   12.  The third party informs the client that the requested operation
+   12.  The registry informs the registrar of the result of the
+        operation, so that the registrar can update its records
+        accordingly.
+   13.  The third party informs the client that the requested operation
         has been completed.
 
-5.  HTTP
+5.  Data Objects
 
-5.1.  Endpoints
+   *TODO* here or in data objects doc? (now in data objects doc)
 
-   The following non normative table lists RPP endpoints related to
-   authorisation processes, each derived by applying the rules defined
-   in section "HTTP Mapping Rules" in [I-D.ietf-rpp-core].
+5.1.  Component Data Objects
 
-   +==============+======+=====================================================+
-   |Operation     |HTTP  |URL path                                             |
-   |              |Method|                                                     |
-   +==============+======+=====================================================+
-   |Authorisation:|"POST"|"/{collection}/{id}/processes/authorisationProcesses"|
-   |create        |      |                                                     |
-   +--------------+------+-----------------------------------------------------+
-   |Authorisation:|"GET" |"/{collection}/{id}/processes/authorisationProcesses/|
-   |read          |      |latest"                                              |
-   +--------------+------+-----------------------------------------------------+
-   |Authorisation:|"GET" |"/{collection}/{id}/processes/                       |
-   |read          |      |authorisationProcesses/{id}"                         |
-   +--------------+------+-----------------------------------------------------+
-   |Authorisation:|"GET" |"/{collection}/{id}/processes/authorisationProcesses"|
-   |list          |      |                                                     |
-   +--------------+------+-----------------------------------------------------+
-
-                                  Table 1
+5.1.1.  Public Key Data Object
 
    *TODO*
 
-   POST: Create a new authorization request, signed by the registry
+5.1.2.  Signature Data Object
 
-5.2.  Approval Header
+   *TODO*
 
-   The value of the RPP-Approval header is a base64 encoded string that
-   represents the signed approval request, which is used by the registry
-   to verify that the request has been approved by the registrar and
-   registrant.  The header field uses the following ABNF syntax:
+5.1.3.  Approval Data Object
 
-   Approval = "RPP-Approval" ":" SP approval-token
-   approval-token = 1*CHAR
+   *TODO*
 
-   Example HTTP request using the RPP-Approval header in a domain update
-   operation, to update the DNS records for a domain object:
+5.2.  Authorisation Data Object
 
-   PATCH /domainNames/test1.example HTTP/1.1
-   RPP-Approval: <approval-token>
-   Authorization: Bearer <access-token>
-   Content-Type: application/json
+5.2.1.  Elements
 
-   **TODO** messagebody here
+   This section describes the data elements of the Authorisation Data
+   Object, as defined in [I-D.ietf-rpp-data-objects].
 
-   *TODO* do we want to base64 encode the approval token?  It is a JSON
-   object, so it can contain characters that are not allowed in HTTP
-   headers.  Base64 encoding would make it safe to include in the
-   header, but it would also make it larger.  We could also use a query
-   parameter instead of a header, but that would make it visible in logs
-   and browser history.
+   -  transactionType: The type of transaction for the authorisation
+      request.  MUST be one of the values registered in the "RPP Multi-
+      Party Transaction Types" registry Table 5.  Every transaction type
+      is associated with a specific RPP operation, and the data property
+      of the authorisation request MUST contain the RPP request body for
+      that operation.
+   -  id: The identifier for the authorisation request.
+   -  timestamp: The time the authorisation request was created.
+   -  expiration: The time the authorisation request expires.  MUST be
+      later than timestamp.
+   -  objectId: The identifier of the object the authorisation request
+      pertains to.
+   -  requestorId: The unique organisation identifier of the requestor.
+   -  requestorName: The name of the requestor.
+   -  approvalUrl: The URI to which the client should be redirected for
+      multi-party approval.  MUST only be used when the referenced
+      organisation is a registrar or reseller supporting multi-party
+      approval.
+   -  returnUrl: The URI to which the client should be redirected after
+      multi-party approval at the registrar.  MUST only be used when the
+      referenced organisation is a 3rd party supporting multi-party
+      approval.
+   -  usage: The usage type for the authorisation request.  MUST be one
+      of "single-use" or "multi-use".
+   -  data: The data associated with the authorisation request,
+      containing the RPP request body for the operation identified by
+      transactionType; MUST be a valid RPP Data Object, see Section 8.
+   -  signatures: The digital signatures applied to the authorisation
+      request, used to verify its authenticity and integrity, see
+      Section 7.
+   -  approval: The approval information for the authorisation request.
 
-6.  Public Keys
+5.2.2.  Usage of elements by parties
+
+   The Authorisation Data Object elements are set by different parties
+   involved in the multi-party authorization flow, and read by others as
+   needed to process or verify the transaction.
+
+     +=================+=====================+======================+
+     | Identifier      | Set by              | Read by              |
+     +=================+=====================+======================+
+     | transactionType | 3rd party           | Registry, Registrar  |
+     +-----------------+---------------------+----------------------+
+     | id              | Registry            | 3rd party, Registrar |
+     +-----------------+---------------------+----------------------+
+     | timestamp       | Registry            | 3rd party, Registrar |
+     +-----------------+---------------------+----------------------+
+     | expiration      | Registry            | 3rd party, Registrar |
+     +-----------------+---------------------+----------------------+
+     | objectId        | 3rd party           | Registry, Registrar  |
+     +-----------------+---------------------+----------------------+
+     | requestorId     | Registry            | Registrar            |
+     +-----------------+---------------------+----------------------+
+     | requestorName   | Registry            | Registrar            |
+     +-----------------+---------------------+----------------------+
+     | approvalUrl     | Registry            | 3rd party            |
+     +-----------------+---------------------+----------------------+
+     | returnUrl       | Registry            | Registrar            |
+     +-----------------+---------------------+----------------------+
+     | usage           | 3rd party           | Registry, Registrar  |
+     +-----------------+---------------------+----------------------+
+     | data            | 3rd party           | Registry, Registrar  |
+     +-----------------+---------------------+----------------------+
+     | signatures      | Registry, Registrar | Registry, Registrar  |
+     +-----------------+---------------------+----------------------+
+     | approval        | Registrar           | Registry, 3rd party  |
+     +-----------------+---------------------+----------------------+
+
+       Table 1: Party responsible for setting and reading each data
+                                 element
+
+5.2.3.  JSON Schema
+
+   This section provides normative JSON Schema definitions for the
+   transaction types defined in this document.  All schemas use JSON
+   Schema draft 2020-12 [JSON-SCHEMA].  The schema below represents the
+   Authorisation Data Object defined in [I-D.ietf-rpp-data-objects] and
+   described in Section 5.2.1.
+
+   {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "$ref": "#/$defs/authorisation.create",
+     "$defs": {
+       "authorisation.create": {
+         "type": "object",
+         "properties": {
+           "@type": { "type": "string", "const": "authorisation" },
+           "transactionType": { "type": "string", "enum": ["rpp:mpa-type:domain-ns-update", "rpp:mpa-type:domain-dnssec-update", "rpp:mpa-type:transfer"] },
+           "id": { "type": "string" },
+           "timestamp": { "type": "string", "format": "date-time" },
+           "expiration": { "type": "string", "format": "date-time" },
+           "objectId": { "type": "string" },
+           "requestorId": { "type": "string" },
+           "requestorName": { "type": "string" },
+           "approvalUrl": { "type": "string", "format": "uri" },
+           "returnUrl": { "type": "string", "format": "uri" },
+           "usage": { "type": "string", "enum": ["single-use", "multi-use"] },
+           "data": {
+             "description": "The RPP JSON request body for the operation identified by transactionType"
+           },
+           "signatures": {
+             "type": "array",
+             "description": "An ordered list of signatures",
+             "items": {
+               "type": "object",
+               "properties": {
+                 "keyId": { "type": "string" },
+                 "signedAt": {
+                   "type": "string",
+                   "format": "date-time",
+                   "description": "The date and time at which this signature was applied."
+                 },
+                 "signature": { "type": "string" }
+               },
+               "required": ["keyId", "signedAt", "signature"],
+               "additionalProperties": false
+             },
+             "minItems": 0
+           },
+           "approval": {
+             "type": "object",
+             "properties": {
+               "approved": { "type": "boolean" },
+               "approvedBy": { "type": "string" },
+               "reason": { "type": "string" },
+               "timestamp": { "type": "string", "format": "date-time" }
+             },
+             "required": ["approved", "approvedBy", "timestamp"],
+             "additionalProperties": false
+           }
+         },
+         "required": ["@type", "transactionType", "id", "timestamp", "expiration", "objectId", "requestorId"]
+       }
+     }
+   }
+
+   *TODO* currently using single schema where depending on client ,
+   registry or registrar some fields are required and some are optional.
+   Could also define separate schemas for each party.
+
+5.3.  Organization Data Object
+
+   This specification extends the Organization type specified in
+   [I-D.ietf-rpp-data-objects] to include two additional elements:
+   approvalUrl, which is a URL that points to the registrar's web-based
+   consent screen, and returnUrl, which is a URL to which the client's
+   browser is redirected after the registrant has approved or denied the
+   requested operation.  The approvalUrl and returnUrl MUST be valid
+   URLs, and they MUST use the HTTPS scheme.
+
+5.3.1.  Approval Redirect URL
+
+   A registrar that supports multi-party authorization MUST provide a
+   web-based consent screen to which the 3rd party can redirect the
+   client's browser to obtain the registrant's approval for the
+   requested operation.  The registrar MUST provide a URL for this
+   consent screen to the registry, which is used by the registry to
+   inform the 3rd party where to redirect the client's browser.
+
+5.3.2.  Return Redirect URL
+
+   *TODO*:
+
+6.  Request Processing
+
+   The request is initiated by the 3rd party, and processed by the
+   registry and registrar.  The request is signed by the registry and
+   registrar.
+
+6.1.  Third Party
+
+   The 3rd party constructs the request, setting the transactionType,
+   objectId, and data properties, and sends the request to the registry.
+
+6.2.  Registry
+
+   The registry, after validation of the request, adds the following
+   properties to the request: id, requestorId, requestorName,
+   approvalUrl, returnUrl, timestamp, expiration, signatures.  The id is
+   a unique identifier for the transaction.  The requestorId is the
+   identifier of the 3rd party that created the request, the
+   requestorName is the public name of the requestor to be displayed in
+   the consent screen.  The approvalUrl is the URL where the request can
+   be approved, the returnUrl is the URL to return to after approval,
+   the timestamp is the time the request was created, the expiration is
+   the time the request expires, the signatures contain the
+   cryptographic signatures, the registry MUST add its signature of the
+   request to the signatures array, it MUST be the first element in the
+   array.
+
+6.3.  Registrar
+
+   The registrar adds the approval object to the request, to indicate
+   whether the registrant and registrar have approved the transfer; at
+   minimum, approval.approved and approval.approvedBy MUST be set.  The
+   registrar also adds its signature and public key identifier to the
+   signatures array in the request, it MUST be the second element in the
+   array.  The registrar MUST verify the signature of the registry using
+   the public key linked to the public key identifier in the request.
+
+7.  Request Signing and Verification
+
+   This section describes how each party involved in the multi-party
+   authorization flow must cryptographically sign, and verify the
+   authenticity and integrity of the transaction request.  All parties
+   involved in the multi-party authorization flow MUST use strong
+   cryptography to sign and verify requests.  The specific algorithms
+   and key management practices are outside the scope of this document,
+   but it is RECOMMENDED that parties follow best practices for
+   cryptographic security.
+
+   Each party MUST sign only the data that it is responsible for, and
+   MUST verify the signatures of all other parties involved in the
+   transaction.  Each party MUST include its public key identifier in
+   the request or response, so that other parties can verify the
+   signature.
+
+7.1.  Public Keys
 
    A registrar that wants to participate in multi-party authorization
    MUST provide at least one public key to the registry.  Each key is
@@ -367,41 +571,11 @@ Table of Contents
      ]
    }
 
-7.  Approval Redirect URLs
+7.1.1.  JSON Schema
 
-   A registrar that supports multi-party authorization MUST provide a
-   web-based consent screen to which the 3rd party can redirect the
-   client's browser to obtain the registrant's approval for the
-   requested operation.  The registrar MUST provide a URL for this
-   consent screen to the registry, which is used by the registry to
-   inform the 3rd party where to redirect the client's browser.
+   *TODO*
 
-   This specification extends the Organization type specified in
-   [I-D.ietf-rpp-data-objects] to include an additional field
-   approvalRedirectUrl, which is a URL that points to the registrar's
-   web-based consent screen.  The approvalRedirectUrl field is a string
-   that MUST be a valid URL, and it MUST use the HTTPS scheme.
-
-   *TODO*:
-
-8.  Transaction signing and verification
-
-   This section describes how each party involved in the multi-party
-   authorization flow must cryptographically sign, and verify the
-   authenticity and integrity of the transaction request.  All parties
-   involved in the multi-party authorization flow MUST use strong
-   cryptography to sign and verify requests.  The specific algorithms
-   and key management practices are outside the scope of this document,
-   but it is RECOMMENDED that parties follow best practices for
-   cryptographic security.
-
-   Each party MUST sign only the data that it is responsible for, and
-   MUST verify the signatures of all other parties involved in the
-   transaction.  Each party MUST include its public key identifier in
-   the request or response, so that other parties can verify the
-   signature.
-
-8.1.  Canonicalization and Signing Input
+7.2.  Canonicalization and Signing Input
 
    Signers MUST NOT construct the signature input by naively
    concatenating field values as strings.  Ad hoc concatenation is
@@ -419,79 +593,87 @@ Table of Contents
    formatting, making the signature input reproducible by any conforming
    verifier.
 
-   Each signature MUST also cover every signature and key identifier
-   field already present in the request at the time that signature is
-   applied.  This chains each countersignature to the ones that precede
-   it, so that removing, reordering, or substituting an earlier
-   signature invalidates every signature applied after it.  Concretely,
-   for the fields defined in Section 10:
+   A signature MUST NOT cover the signature or key identifier fields of
+   any other party.  Chaining a later signature over earlier signatures
+   would add no additional protection.  Each party MUST include its own
+   public key identifier alongside its signature, so that other parties
+   can verify it.
 
-   -  The registry signs the JCS-canonicalized form of {transactionType,
-      id, timestamp, expiration, objectId, requestorId, data,
-      requestorSig, requestorKeyId, registryKeyId} and places the result
-      in registrySig.
-   -  The registrar signs the JCS-canonicalized form of
-      {transactionType, id, timestamp, expiration, objectId,
-      requestorId, data, requestorSig, requestorKeyId, registrySig,
-      registryKeyId, registrarKeyId} and places the result in
-      registrarSig.
-
-   Verifiers MUST validate signatures in the same order they were
-   applied (3rd party, then registry, then registrar), reconstructing
-   the corresponding canonical input at each step, and MUST reject the
-   request if any signature does not verify against its expected
-   canonical input.
-
-8.2.  Registry
+7.3.  Registry
 
    The registry MUST verify the transaction request, and copy the
    request to a response document while adding additional transaction
    related properties, and finally sign the request using its private
-   key.  The signature MUST be included in the response object.  The
-   registry MUST also include its public key identifier in the response,
-   so that the registrar can verify the signature.
+   key.  The signature MUST be included in the response object.
 
-8.3.  Registrar
+   The registry signs the JCS-canonicalized form of:
+
+   -  transactionType
+   -  id
+   -  timestamp
+   -  expiration
+   -  objectId
+   -  requestorId
+   -  approvalUrl
+   -  returnUrl
+   -  data
+
+   The registry inserts the signature as an object in the signatures
+   array.
+
+7.4.  Registrar
 
    The registrar MUST verify the signature of the registry using the
-   public key linked to the public key identifier in the response.  The
-   registrar MUST copy the JSON request into a JSON response object, add
-   additional transactional properties such as the approval status, and
-   sign it using its private key.  The signature MUST be included in the
-   response object.  The registrar MUST also include its public key
-   identifier in the response, so that the registry can verify the
-   signature.
+   public key linked to the public key identifier found in the first
+   element of the signatures array, and copy the request to a response
+   document while adding additional transaction related properties, and
+   finally sign the request using its private key.  The signature MUST
+   be included in the response object.
 
-9.  Transaction Types
+   The registrar signs the JCS-canonicalized form of all properties
+   signed by the registry, but it MUST include the following additional
+   property in the signature input:
+
+   -  approval
+
+   The registrar inserts the signature as an object in the signatures
+   array.
+
+   Verifiers MUST independently validate each signature present in the
+   request against this same canonical input, using the public key
+   identified by that signature's key identifier field, and MUST reject
+   the request if any signature does not verify.
+
+   *TODO* OR just have both parties sign all the fields, except the
+   signatures array. and have the verifier check that both signatures
+   are present and valid.
+
+8.  Transaction Types
 
    *TODO* the transaction types ares defined in separate documents, this
    document only describes the generic flow and the signing and
    verification of transactions.  The transaction types are defined in
    separate documents, which MUST be registered with IANA as described
-   in Section 12.
+   in Section 13.
 
-   This document defines two transaction types for multi-party
-   authorization: rpp:transaction:dns-update and
-   rpp:transaction:transfer.  A transaction type allows access to
-   specific RPP operations for specific objects only.  Future
+   This document defines three transaction types for multi-party
+   authorization: rpp:mpa-type:domain-ns-update, rpp:mpa-type:domain-
+   dnssec-update, and rpp:mpa-type:transfer.  A transaction type allows
+   access to specific RPP operations for specific objects only.  Future
    specifications may define additional transaction types, which MUST be
-   registered with IANA as described in Section 12.
+   registered with IANA as described in Section 13.
 
-   This specification does not define a bespoke payload format for the
-   operation being authorized.  Instead, the data property of a
+   This specification does not define a separate payload format for the
+   RPP operation being authorized.  Instead, the data property of a
    transaction request MUST contain the same JSON request body that
    would be sent directly to the RPP server for the corresponding
    operation, using the mapping rules and object representations defined
-   in [I-D.ietf-rpp-json].  Reusing the RPP JSON request body avoids
-   maintaining a second, parallel representation of every RPP operation,
-   keeps the authorized payload identical to what is ultimately executed
-   by the registry, and lets this specification remain agnostic to
-   future RPP object and operation definitions.
+   in [I-D.ietf-rpp-json].
 
-9.1.  DNS Update Transaction Type
+8.1.  Domain Name Server Update
 
-   The rpp:transaction:dns-update transaction type is used to update the
-   DNS hosting of a domain name, by replacing the set of Host Data
+   The rpp:mpa-type:domain-ns-update transaction type is used to update
+   the DNS hosting of a domain name, by replacing the set of Host Data
    Objects referenced in the domain's nameservers property with a new
    set of Host Data Objects.  The objectId property MUST contain the
    domain name of the target Domain Name Object.
@@ -506,81 +688,182 @@ Table of Contents
 
    *TODO*
 
-9.2.  Transfer Transaction Type
+8.2.  Domain DNSSEC Update
 
-   The rpp:transaction:transfer transaction type is used to transfer the
+   The rpp:mpa-type:domain-dnssec-update transaction type is used to
+   update the DNSSEC DS records of a domain name, by replacing the set
+   of DS records referenced in the domain's dns property with a new set
+   of DS records.  The objectId property MUST contain the domain name of
+   the target Domain Name Object.
+
+   The data property MUST contain a valid RPP JSON partial update
+   request body (a JSON Patch document, as defined in the Partial Update
+   rules of [I-D.ietf-rpp-json]).
+
+   *TODO*
+
+8.3.  Domain Transfer
+
+   The rpp:mpa-type:transfer transaction type is used to transfer the
    sponsorship of a domain to another registrar.  The objectId property
    MUST contain the domain name of the target Domain Name Object, and
    the data property MUST contain a valid Transfer Process Object create
    request body, as defined in [I-D.ietf-rpp-json], for the transfer
    operation described in [I-D.ietf-rpp-core].
 
-9.3.  JSON Schema
+   *TODO*
 
-   This section provides normative JSON Schema definitions for the
-   transaction types defined in this document.  All schemas use JSON
-   Schema draft 2020-12 [JSON-SCHEMA]
+9.  HTTP
 
-   {
-     "$schema": "https://json-schema.org/draft/2020-12/schema",
-     "$ref": "#/$defs/authorizeProcess.create",
-     "$defs": {
-       "authorizeProcess.create": {
-         "type": "object",
-         "properties": {
-           "@type": { "type": "string", "const": "authorizeProcess" },
-           "transactionType": { "type": "string", enum: ["rpp:transaction:dns-update", "rpp:transaction:transfer"] },
-           "id": { "type": "string" },
-           "timestamp": { "type": "string", "format": "date-time" },
-           "expiration": { "type": "string", "format": "date-time" },
-           "objectId": { "type": "string" },
-           "data": {
-             "description": "The RPP JSON request body for the operation identified by transactionType:
-              a JSON object for a full resource representation, or a JSON Patch array for a partial update,
-              as defined in the RPP JSON Mapping specification."
-           },
-           "requestorName": { "type": "string" },
-           "registrySig": { "type": "string" },
-           "registryKeyId": { "type": "string" },
-           "registrarSig": { "type": "string" },
-           "registrarKeyId": { "type": "string" },
-           "registrarApproval": { "type": "boolean" },
-           "registrantApproval": { "type": "boolean" }
-         },
-         "required": ["@type", "transactionType"]
-       }
-     }
-   }
+9.1.  Endpoints
+
+   The following non normative table lists RPP endpoints related to
+   authorisation processes, each derived by applying the rules defined
+   in section "HTTP Mapping Rules" in [I-D.ietf-rpp-core].
+
+   +==============+======+=====================================================+
+   |Operation     |HTTP  |URL path                                             |
+   |              |Method|                                                     |
+   +==============+======+=====================================================+
+   |Authorisation:|"POST"|"/{collection}/{id}/processes/authorisationProcesses"|
+   |create        |      |                                                     |
+   +--------------+------+-----------------------------------------------------+
+   |Authorisation:|"GET" |"/{collection}/{id}/processes/authorisationProcesses/|
+   |read          |      |latest"                                              |
+   +--------------+------+-----------------------------------------------------+
+   |Authorisation:|"GET" |"/{collection}/{id}/processes/                       |
+   |read          |      |authorisationProcesses/{id}"                         |
+   +--------------+------+-----------------------------------------------------+
+   |Authorisation:|"GET" |"/{collection}/{id}/processes/authorisationProcesses"|
+   |list          |      |                                                     |
+   +--------------+------+-----------------------------------------------------+
+
+                                  Table 2
+
+   *TODO*
+
+9.2.  Request Header
+
+   The RPP-Multi-Party-Auth MUST be used by the 3rd party when
+   submitting an authorised RPP request to the registry.  Without this
+   header, the registry MUST reject the request with a 400 Bad Request
+   response.
+
+   The value of the RPP-Multi-Party-Auth header is a base64 encoded
+   string that represents the signed approval request, the header uses
+   the following ABNF syntax:
+
+   Approval = "RPP-Multi-Party-Auth" ":" SP approval-token
+   approval-token = 1*CHAR
+
+   Example HTTP request using the RPP-Multi-Party-Auth header in a
+   domain update operation, to update the DNS records for a domain
+   object:
+
+   PATCH /domainNames/test1.example HTTP/1.1
+   RPP-Multi-Party-Auth: <rpp-mpa-token>
+   Authorization: Bearer <access-token>
+   Content-Type: application/json
+
+   **TODO** messagebody here
+
+   *TODO* do we want to base64 encode the approval token?  It is a JSON
+   object, so it can contain characters that are not allowed in HTTP
+   headers.  Base64 encoding would make it safe to include in the
+   header, but it would also make it larger.  We could also use a query
+   parameter instead of a header, but that would make it visible in logs
+   and browser history.
+
+9.3.  Return Header
+
+   The 3rd party MUST include the RPP-Multi-Party-Return header in the
+   HTTP response when redirecting the registrant browser to the
+   registrar approval page.  The value contains the URL where the
+   registrant's browser should be redirected after the request is
+   approved by both the registrar and the registrant.  The header uses
+   the following ABNF syntax:
+
+   Return = "RPP-Multi-Party-Return" ":" SP return-url
+   return-url = 1*CHAR
 
 10.  Examples
 
 10.1.  Key provisioning
 
    Each party involved in the multi-party authorization flow MUST
-   provide at least 1 public key at the registry.
+   provide at least 1 public key at the registry.  Public keys are
+   provisioned by adding a Public Key Object to the publicKeys property
+   of the party's Organisation Data Object [I-D.ietf-rpp-data-objects],
+   using an RPP JSON partial update (JSON Patch, as defined in the
+   Partial Update rules of [I-D.ietf-rpp-json]).  Since publicKeys is a
+   DictionaryComposition[Public Key Object], adding a new key MUST be
+   done using an add operation whose path targets the new key identifier
+   directly; the match property is not used, as it only applies to
+   array-valued properties.
 
-   *TODO*: Use the Organisation type?
+   The following example shows a partial update request adding an RSA
+   public key with identifier registrar-key-3 to the publicKeys property
+   of the Organisation Data Object with id ORG-12345:
 
-   {
-   ...
-   }
+   PATCH /organisations/me HTTP/1.1
+   Authorization: Bearer <access-token>
+   Content-Type: application/json
+   [
+     {
+       "op": "add",
+       "path": "/publicKeys",
+       "value": {
+         "registrar-key-3": {
+             "@type": "publicKey",
+             "type": "RSA",
+             "alg": "RS256",
+             "n": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbb....",
+             "e": "AQAB"
+           }
+       }
+     }
+   ]
 
-10.2.  Domain Update Request
+   *TODO* do we want to define "me" as a special identifier for the org
+   of the current loggedin user, makes things easier for clients, will
+   need to update core doc.
 
-   Example 3rd party request to registry to replace the nameservers of a
-   domain object with a new set of Host Data Objects, and replace the
-   DNSSEC DS records.  The data property contains an RPP JSON partial
-   update (JSON Patch) request body as defined in [I-D.ietf-rpp-json],
-   with two replace operations, one for replacing the existing
-   nameservers and one for replacing the DNSSEC DS records.  The example
-   below shows a request to update the domain test1.example, replacing
-   the existing nameservers with ns1.dns.example and ns2.dns.example and
-   replacing the existing DS records with a new DS record with key tag
+10.2.  Redirection URL management
+
+   The registrar's approvalUrl and the 3rd party's returnUrl of their
+   respective Organisation Data Object MUST be set, and MUST be valid
+   URLs.  Updating these URLs is done using an RPP JSON partial update
+   of the Organisation Data Object, using a replace operation for each
+   URL.  The following example shows a partial update request to set the
+   approvalUrl of the registrar's Organisation Data Object with id ORG-
    12345:
 
+   PATCH /organisations/ORG-12345 HTTP/1.1
+   Authorization: Bearer <access-token>
+   Content-Type: application/json
+   [
+     {
+       "op": "replace",
+       "path": "/approvalUrl",
+       "value": "https://registrar.example/consent"
+     }
+   ]
+
+   *TODO*
+
+10.3.  Domain Name Server Update Request
+
+   Example 3rd party request to registry to replace the nameservers of a
+   domain object with a new set of Host Data Objects.  The data property
+   contains an RPP JSON partial update (JSON Patch) request body as
+   defined in [I-D.ietf-rpp-json], with one replace operation for the
+   existing nameservers.  The example below shows a request to update
+   the domain test1.example, replacing the existing nameservers with
+   ns1.dns.example and ns2.dns.example:
+
    {
-     "@type": "authorization",
-     "transactionType": "rpp:transaction:dns-update",
+     "@type": "authorisation",
+     "transactionType": "rpp:mpa-type:domain-ns-update",
      "timestamp": "2027-06-01T12:00:00Z",
      "expiration": "2027-06-01T12:10:00Z",
      "objectId": "test1.example",
@@ -592,37 +875,58 @@ Table of Contents
            { "@type": "host", "hostName": "ns1.dns.example" },
            { "@type": "host", "hostName": "ns2.dns.example" }
          ]
-       },
+       }
+     ]
+   }
+
+   Example Registry Response: *TODO*
+
+   Example Registrar Response: *TODO*
+
+10.4.  Domain DNSSEC Update Request
+
+   Example 3rd party request to registry to replace the DNSSEC DS
+   records of a domain object with a new set of DS records.  The data
+   property contains an RPP JSON partial update (JSON Patch) request
+   body as defined in [I-D.ietf-rpp-json], with one replace operation
+   for the existing DS records.  The example below shows a request to
+   update the domain test1.example, replacing the existing DS records
+   with a new DS record with key tag 12345:
+
+   {
+     "@type": "authorisation",
+     "transactionType": "rpp:mpa-type:domain-dnssec-update",
+     "timestamp": "2027-06-01T12:00:00Z",
+     "expiration": "2027-06-01T12:10:00Z",
+     "objectId": "test1.example",
+     "data": [
        {
          "op": "replace",
          "path": "/dns",
          "value": {
            "@type": "dnsData",
-           "records": {
-             "DS": [
+           "records": [
                { "@type": "dnsRecord",
-                 "name": "test1.example",
+                 "name": "@",
                  "ttl": 3600,
-                 "rdata": { "@type": "dsRdata",
-                            "keyTag": 12345,
+                 "type": "ds",
+                 "rdata": { "keyTag": 12345,
                             "algorithm": 8,
                             "digestType": 2,
                             "digest": "ABCDEF1234567890"
                           }
                }
-             ]
-           }
+           ]
          }
        }
      ]
    }
 
-   *TODO* maybe split the example into two separate examples, one for
-   replacing nameservers and one for replacing DS records, to make it
-   clearer. and also create 2 separate transaction types, one for
-   replacing nameservers and one for replacing DS records?
+   Example Registry Response: *TODO*
 
-10.3.  Domain Transfer Request
+   Example Registrar Response: *TODO*
+
+10.5.  Domain Transfer Request
 
    Example 3rd party request to registry to transfer the management of a
    domain object, signed by the 3rd party.  The data property contains a
@@ -630,8 +934,8 @@ Table of Contents
    [I-D.ietf-rpp-json]:
 
    {
-     "@type": "authorization",
-     "transactionType": "rpp:transaction:transfer",
+     "@type": "authorisation",
+     "transactionType": "rpp:mpa-type:transfer",
      "id": "TR-12345",
      "timestamp": "2027-06-01T12:00:00Z",
      "expiration": "2027-06-01T12:10:00Z",
@@ -648,52 +952,81 @@ Table of Contents
    transfer:
 
    The registry adds the following fields to the request: id,
-   requestorId, requestorName, registrySig, and registryKeyId.  The id
-   is a unique identifier for the transaction, the requestorName is the
+   requestorId, requestorName, and signatures.  The id is a unique
+   identifier for the transaction, the requestorId is the identifier of
+   the 3rd party that created the request, the requestorName is the
    public name of the requestor to be displayed in the consent screen,
-   the registrySig is the signature of the registry, and the
-   registryKeyId is the identifier of the public key used by the
-   registry to sign the request.
+   and the signatures array contains the registry's signature and public
+   key identifier, as the first element in the array.
 
    {
-     "@type": "authorization",
-     "transactionType": "rpp:transaction:transfer",
+     "@type": "authorisation",
+     "transactionType": "rpp:mpa-type:transfer",
      "id": "TR-12345",
      "timestamp": "2027-06-01T12:00:00Z",
      "expiration": "2027-06-01T12:10:00Z",
      "objectId": "test1.example",
+     "requestorId": "ORG-3RDPARTY-1",
      "requestorName": "Example Registrar",
-     "registrySig": "xxxx",
-     "registryKeyId": "xxxx"
+     "data": {
+       "@type": "transferProcess",
+       "transferDir": "pull"
+     },
+     "signatures": [
+       {
+         "keyId": "my-registry-key-1",
+         "signedAt": "2027-06-01T12:00:00Z",
+         "signature": "yyyyy"
+       }
+     ]
    }
 
    Example response from losing registrar to the 3rd party to transfer
-   the management of a domain object, signed by the registrar, the
-   following fields are added to the request: registrarSig,
-   registrarKeyId, registrarApproval, and registrantApproval.  The
-   registrarSig is the signature of the registrar, the registrarKeyId is
-   the identifier of the public key used by the registrar to sign the
-   request, and the registrarApproval and registrantApproval are boolean
-   values indicating whether the registrar and registrant have approved
-   the transfer.
+   the management of a domain object, signed by the registrar; the
+   following approval object is added to the request, to indicate
+   whether the registrant and registrar have approved the transfer.  The
+   registrar also adds its signature and public key identifier to the
+   signatures array in the request.
 
    This response is sent to the registry to request execution of the
    transfer:
 
    {
-     "@type": "authorization",
-     "transactionType": "rpp:transaction:transfer",
+     "@type": "authorisation",
+     "transactionType": "rpp:mpa-type:transfer",
      "id": "TR-12345",
      "timestamp": "2027-06-01T12:00:00Z",
      "expiration": "2027-06-01T12:10:00Z",
      "objectId": "test1.example",
-     "registrySig": "xxxx",
-     "registryKeyId": "xxxx",
-     "registrarSig": "xxxx",
-     "registrarKeyId": "xxxx",
-     "registrarApproval": true,
-     "registrantApproval": true
+     "requestorId": "ORG-3RDPARTY-1",
+     "requestorName": "Example Registrar",
+     "approval": {
+       "approved": true,
+       "approvedBy": "registrar-admin@example-registrar.example",
+       "timestamp": "2027-06-01T12:05:00Z"
+     },
+     "data": {
+       "@type": "transferProcess",
+       "transferDir": "pull"
+     },
+     "signatures": [
+       {
+         "keyId": "my-registry-key-1",
+         "signedAt": "2027-06-01T12:00:00Z",
+         "signature": "yyyyy"
+       },
+       {
+         "keyId": "my-registrar-key-1",
+         "signedAt": "2027-06-01T12:05:00Z",
+         "signature": "zzzzz"
+       }
+     ]
    }
+
+   After the registry verifies the signatures of the registry and
+   registrar, and confirms that approval.approved is set to true, it
+   executes the transfer operation and returns the result to the 3rd
+   party.
 
 11.  Security Considerations
 
@@ -709,10 +1042,22 @@ Table of Contents
    registrant's consent is obtained before any RPP operation is
    executed.
 
-   What cryptographic algorithms and key management practices are used
-   to sign and verify requests is outside the scope of this document,
-   but it is RECOMMENDED that parties follow best practices for
-   cryptographic security.
+   The registry MUST ensure that the registrar is the current sponsoring
+   registrar of record for the domain name for which the RPP operation
+   is requested, the sponsoring registrar may have changed between the
+   time the request is created and the time the RPP operation, using the
+   authorization request, is executed.
+
+   The registry MUST check if the authorization request used to request
+   an RPP operation is correctly signed by the registry itself and the
+   registrar, and that the request is valid and not expired.  The
+   registry MUST reject any request with a missing or invalid signature,
+   or that is invalid or expired.  The Registry MUST check that the
+   authorization request is used only once, when the use property is set
+   to single-use.  The registry MUST ensure that the authorization
+   request is used only for the specific RPP operation for which it was
+   created, and that the request is not used to authorize any other
+   operation.
 
    Signature verification MUST be performed locally by each verifying
    party using the public key of the signer, rather than by querying the
@@ -731,20 +1076,105 @@ Table of Contents
    endpoints, such as using TLS for end-to-end encryption, and OAUTH 2.0
    [RFC6749] for authorization.
 
-   Public keys provided by the 3rd party, registry, and registrar to the
-   registry SHOULD be rotated periodically, and MUST be revoked if
-   compromised.
+   What cryptographic algorithms and key management practices are used
+   to sign and verify requests is outside the scope of this document,
+   but it is RECOMMENDED that parties follow best practices for
+   cryptographic security.
 
    *TODO*
 
-12.  IANA Considerations
+12.  RPP result codes
+
+   This specification defines new RPP result codes for multi-party
+   authorization, used to indicate the result of creating an
+   authorization request, and of an RPP operation that was requested
+   using a multi-party authorization request.  These result codes follow
+   the result code classes defined in [I-D.ietf-rpp-core]: 14xxx for
+   client errors and 15xxx for server errors.  As described in
+   [I-D.ietf-rpp-core].
+
+12.1.  Client Errors
+
+   The following client error result codes (class 14xxx) are defined in
+   this document:
+
+    +========+===========+===========================================+
+    | RPP    | HTTP      | Description                               |
+    | Result | Status    |                                           |
+    | Code   | Code      |                                           |
+    +========+===========+===========================================+
+    | 14001  | 400 Bad   | The transactionType is missing, unknown,  |
+    |        | Request   | or not registered in the "RPP Multi-Party |
+    |        |           | Transaction Types" registry Table 5.      |
+    +--------+-----------+-------------------------------------------+
+    | 14002  | 400 Bad   | The data property does not conform to the |
+    |        | Request   | RPP JSON request body expected for the    |
+    |        |           | given transactionType.                    |
+    +--------+-----------+-------------------------------------------+
+    | 14003  | 404 Not   | The objectId does not identify an         |
+    |        | Found     | existing object.                          |
+    +--------+-----------+-------------------------------------------+
+    | 14004  | 403       | One or more required signatures are       |
+    |        | Forbidden | missing or fail cryptographic             |
+    |        |           | verification.                             |
+    +--------+-----------+-------------------------------------------+
+    | 14005  | 400 Bad   | A keyId referenced in the request does    |
+    |        | Request   | not match any public key currently        |
+    |        |           | provisioned by the identified party.      |
+    +--------+-----------+-------------------------------------------+
+    | 14006  | 403       | The 3rd party is not accredited by the    |
+    |        | Forbidden | registry to perform the requested         |
+    |        |           | operation on the referenced object.       |
+    +--------+-----------+-------------------------------------------+
+    | 14007  | 403       | The identified registrar is not the       |
+    |        | Forbidden | current sponsoring registrar of record    |
+    |        |           | for the referenced object.                |
+    +--------+-----------+-------------------------------------------+
+    | 14008  | 400 Bad   | The expiration timestamp of the request   |
+    |        | Request   | has already passed.                       |
+    +--------+-----------+-------------------------------------------+
+    | 14009  | 409       | The id of the request has already been    |
+    |        | Conflict  | used by a previously completed or in-     |
+    |        |           | progress transaction.                     |
+    +--------+-----------+-------------------------------------------+
+    | 14010  | 403       | The registrant did not approve the        |
+    |        | Forbidden | requested operation at the registrar's    |
+    |        |           | consent screen.                           |
+    +--------+-----------+-------------------------------------------+
+
+     Table 3: RPP multi-party authorization client error result codes
+
+12.2.  Server Errors
+
+   The following server error result codes (class 15xxx) are defined in
+   this document:
+
+   +============+==============+=======================================+
+   | RPP Result | HTTP Status  | Description                           |
+   | Code       | Code         |                                       |
+   +============+==============+=======================================+
+   | 15001      | 500 Internal | The registry was unable to sign       |
+   |            | Server Error | the authorization request.            |
+   +------------+--------------+---------------------------------------+
+   | 15002      | 500 Internal | The registry was unable to            |
+   |            | Server Error | retrieve or validate a                |
+   |            |              | registrar's public key.               |
+   +------------+--------------+---------------------------------------+
+
+      Table 4: RPP multi-party authorization server error result codes
+
+13.  IANA Considerations
+
+   IANA is requested to register the result codes defined in Table 3 and
+   Table 4 in the "RPP Result codes" registry defined in
+   [I-D.ietf-rpp-core].
 
    IANA is requested to create a new registry for RPP multi-party
    transaction type identifiers, these identifiers are used to identify
    the type of RPP transaction used by 3rd parties to request
    authorization from the registry and registrar.  The registry is to be
-   called "RPP Transaction Types" and is to be maintained by the IETF
-   RPP working group.
+   called "RPP Multi-Party Transaction Types" and is to be maintained by
+   the IETF RPP working group.
 
    Name of the registry: RPP Multi-Party Transaction Types
    Registry group: RESTful Provisioning Protocol (RPP)
@@ -752,24 +1182,28 @@ Table of Contents
 
    The following transaction types are defined in this document:
 
-     +============================+=================================+
-     | Identifier                 | Description                     |
-     +============================+=================================+
-     | rpp:transaction:dns-update | Update DNS records for a domain |
-     +----------------------------+---------------------------------+
-     | rpp:transaction:transfer   | Transfer a domain to another    |
-     |                            | registrar                       |
-     +----------------------------+---------------------------------+
+    +===================================+============================+
+    | Identifier                        | Description                |
+    +===================================+============================+
+    | rpp:mpa-type:domain-ns-update     | Update DNS hosting         |
+    |                                   | (nameservers) for a domain |
+    +-----------------------------------+----------------------------+
+    | rpp:mpa-type:domain-dnssec-update | Update DNSSEC DS records   |
+    |                                   | for a domain               |
+    +-----------------------------------+----------------------------+
+    | rpp:mpa-type:transfer             | Transfer a domain to       |
+    |                                   | another registrar          |
+    +-----------------------------------+----------------------------+
 
-         Table 2: RPP multi-party authorization transaction types
+         Table 5: RPP multi-party authorization transaction types
 
    *TODO*
 
-13.  Internationalization Considerations
+14.  Internationalization Considerations
 
    *TODO*
 
-14.  Privacy Considerations
+15.  Privacy Considerations
 
    The registrant personally identifiable information (PII) is not
    included in the multi-party authorization flow, except for the
@@ -778,17 +1212,13 @@ Table of Contents
 
    *TODO*
 
-15.  Change History
+16.  Change History
 
    *TODO*
 
-15.1.  Version 00
+17.  References
 
-   -  Created initial draft with core concepts and flows.
-
-16.  References
-
-16.1.  Normative References
+17.1.  Normative References
 
    [I-D.ietf-rpp-core]
               Wullink, M. and P. Kowalik, "RESTful Provisioning Protocol
@@ -834,11 +1264,11 @@ Table of Contents
               DOI 10.17487/RFC8785, June 2020,
               <https://www.rfc-editor.org/info/rfc8785>.
 
-16.2.  Informative References
+17.2.  Informative References
 
    [JSON-SCHEMA]
-              JSON Schema, "JSON Schema: A Media Type for Describing
-              JSON Documents", 2020,
+              JSON Schema, "JSON Schema: A vocabulary for describing
+              JSON Data", 2020,
               <https://json-schema.org/draft/2020-12/json-schema-core>.
 
 Acknowledgements
