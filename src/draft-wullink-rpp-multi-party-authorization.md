@@ -46,9 +46,9 @@ The traditional Registrar, Registry, and Registrant model for domain name manage
 
 # Introduction
 
-The generic multi-party authorization flow described in this document allows registries to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrant's explicit consent is obtained before any RPP operations, described in [@!I-D.ietf-rpp-core], are executed. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The 3rd party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties.
+The generic multi-party authorization flow described in this document allows registries to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrar and registrant's explicit consent is obtained before any RPP operations, described in [@!I-D.ietf-rpp-core], are executed. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The 3rd party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties.
 
-**TODO**
+**TODO** what about registries that allow direct registr access, without a registrar?
 
 # Terminology
 
@@ -61,6 +61,12 @@ Resource - An object having a type, data, and possible relationship to other res
 RPP client - An HTTP user agent performing an RPP request
 
 RPP server - An HTTP server responsible for processing requests and returning results in any supported media type.
+
+Registry - The authoritative source of truth for registration data, responsible for maintaining the database of shared objects and providing access to it through the RPP server.
+
+Registrar - The entity responsible for managing the registration of objects, such as a domain name, on behalf of registrants, typically interacting with both the registrant and the registry.
+
+Registrant - The individual or organization that has registered an object in the registry database.
 
 3rd party - A service provider that is accredited by the registry to perform domain management operations on behalf of the registrant.
 
@@ -305,7 +311,7 @@ A registrar that supports multi-party authorization MUST provide a web-based con
 
 # Request Processing
 
-The request is initiated by the 3rd party, and processed by the registry and registrar. The request is signed by the registry and registrar.
+The request is initiated by the 3rd party, and validated and processed by both the registry and registrar. The request MUST be signed by both the registry and registrar.
 
 ## Third Party
 

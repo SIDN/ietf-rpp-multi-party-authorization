@@ -24,8 +24,8 @@
 <middle>
 
 <section anchor="introduction"><name>Introduction</name>
-<t>The generic multi-party authorization flow described in this document allows registries to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrant's explicit consent is obtained before any RPP operations, described in <xref target="I-D.ietf-rpp-core"></xref>, are executed. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The 3rd party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties.</t>
-<t><strong>TODO</strong></t>
+<t>The generic multi-party authorization flow described in this document allows registries to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrar and registrant's explicit consent is obtained before any RPP operations, described in <xref target="I-D.ietf-rpp-core"></xref>, are executed. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The 3rd party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties.</t>
+<t><strong>TODO</strong> what about registries that allow direct registr access, without a registrar?</t>
 </section>
 
 <section anchor="terminology"><name>Terminology</name>
@@ -34,6 +34,9 @@
 <t>Resource - An object having a type, data, and possible relationship to other resources, identified by a URL.</t>
 <t>RPP client - An HTTP user agent performing an RPP request</t>
 <t>RPP server - An HTTP server responsible for processing requests and returning results in any supported media type.</t>
+<t>Registry - The authoritative source of truth for registration data, responsible for maintaining the database of shared objects and providing access to it through the RPP server.</t>
+<t>Registrar - The entity responsible for managing the registration of objects, such as a domain name, on behalf of registrants, typically interacting with both the registrant and the registry.</t>
+<t>Registrant - The individual or organization that has registered an object in the registry database.</t>
 <t>3rd party - A service provider that is accredited by the registry to perform domain management operations on behalf of the registrant.</t>
 </section>
 
@@ -349,7 +352,7 @@
 </section>
 
 <section anchor="request-processing"><name>Request Processing</name>
-<t>The request is initiated by the 3rd party, and processed by the registry and registrar. The request is signed by the registry and registrar.</t>
+<t>The request is initiated by the 3rd party, and validated and processed by both the registry and registrar. The request MUST be signed by both the registry and registrar.</t>
 
 <section anchor="third-party"><name>Third Party</name>
 <t>The 3rd party constructs the request, setting the <tt>transactionType</tt>, <tt>objectId</tt>, and <tt>data</tt> properties, and sends the request to the registry.</t>
