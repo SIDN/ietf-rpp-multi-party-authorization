@@ -126,7 +126,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
      17.1.  Normative References . . . . . . . . . . . . . . . . . .  28
      17.2.  Informative References . . . . . . . . . . . . . . . . .  29
    Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .  29
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  29
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  30
 
 1.  Introduction
 
@@ -139,7 +139,10 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    relationship, how this trust is established is out of scope for this
    document.  The 3rd party does not have a direct trust relationship
    with the registrar, but the registrar trusts the registry to only
-   accept requests from accredited 3rd parties.
+   accept requests from accredited 3rd parties.  How to secure the HTTP
+   endpoints used in the multi-party authorization flow is out of scope
+   for this document, but it is RECOMMENDED that OAuth 2.0 for RPP, as
+   described in [I-D.wullink-rpp-oauth2], be used.
 
    *TODO* what about registries that allow direct registr access,
    without a registrar?
@@ -158,9 +161,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    RPP server - An HTTP server responsible for processing requests and
    returning results in any supported media type.
 
-   Registry - The authoritative source of truth for registration data,
-   responsible for maintaining the database of shared objects and
-   providing access to it through the RPP server.
 
 
 
@@ -169,6 +169,10 @@ Wullink & Kowalik          Expires 18 May 2027                  [Page 3]
 
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
+
+   Registry - The authoritative source of truth for registration data,
+   responsible for maintaining the database of shared objects and
+   providing access to it through the RPP server.
 
    Registrar - The entity responsible for managing the registration of
    objects, such as a domain name, on behalf of registrants, typically
@@ -214,10 +218,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
         | 1. Initiate   |               |               |
         |  operation    |               |               |
         +-------------->|               |               |
-        |               |               |               |
-        |               | 2. Create     |               |
-        |               |    request    |               |
-        |               |               |               |
 
 
 
@@ -226,6 +226,10 @@ Wullink & Kowalik          Expires 18 May 2027                  [Page 4]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
+        |               |               |               |
+        |               | 2. Create     |               |
+        |               |    request    |               |
+        |               |               |               |
         |               | 3. Send       |               |
         |               |  request      |               |
         |               +-------------->|               |
@@ -270,10 +274,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
         |               |               |  signatures & |
         |               |               |  execute op.  |
         |               |               |               |
-        |               | 11. Execution |               |
-        |               |  result       |               |
-        |               |<--------------|               |
-        |               |               |               |
 
 
 
@@ -282,6 +282,10 @@ Wullink & Kowalik          Expires 18 May 2027                  [Page 5]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
+        |               | 11. Execution |               |
+        |               |  result       |               |
+        |               |<--------------|               |
+        |               |               |               |
         |               |               | 12. Inform    |
         |               |               |  registrar of |
         |               |               |  result       |
@@ -324,11 +328,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    9.   The third party submits the request for the RPP operation to the
         registry, attaching the fully-signed authorisation request in
         the RPP-Multi-Party-Auth HTTP header.
-   10.  The registry verifies the signatures of the registry itself and
-        the registrar.  The registry executes the requested operation
-        only if both signatures are present and valid.
-   11.  The registry returns the result of the operation to the third
-        party.
+
 
 
 
@@ -338,6 +338,11 @@ Wullink & Kowalik          Expires 18 May 2027                  [Page 6]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
+   10.  The registry verifies the signatures of the registry itself and
+        the registrar.  The registry executes the requested operation
+        only if both signatures are present and valid.
+   11.  The registry returns the result of the operation to the third
+        party.
    12.  The registry informs the registrar of the result of the
         operation, so that the registrar can update its records
         accordingly.
@@ -381,11 +386,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
       later than timestamp.
    -  objectId: The identifier of the object the authorisation request
       pertains to.
-   -  requestorId: The unique organisation identifier of the requestor.
-   -  requestorName: The name of the requestor.
-
-
-
 
 
 
@@ -394,6 +394,8 @@ Wullink & Kowalik          Expires 18 May 2027                  [Page 7]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
+   -  requestorId: The unique organisation identifier of the requestor.
+   -  requestorName: The name of the requestor.
    -  approvalUrl: The URI to which the client should be redirected for
       multi-party approval.  MUST only be used when the referenced
       organisation is a registrar or reseller supporting multi-party
@@ -417,8 +419,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    The Authorisation Data Object elements are set by different parties
    involved in the multi-party authorization flow, and read by others as
    needed to process or verify the transaction.
-
-
 
 
 
@@ -1334,9 +1334,9 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    This document does not specify any authorization and authentication
    mechanisms for the 3rd party, registry, and registrar to secure the
    HTTP endpoints used to exchange requests and responses.  It is
-   RECOMMENDED that parties follow best practices for securing HTTP
-   endpoints, such as using TLS for end-to-end encryption, and OAUTH 2.0
-   [RFC6749] for authorization.
+   RECOMMENDED to use OAuth 2.0 for RPP, as described in
+   [I-D.wullink-rpp-oauth2].
+
 
 
 
@@ -1346,9 +1346,9 @@ Wullink & Kowalik          Expires 18 May 2027                 [Page 24]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
-   What cryptographic algorithms and key management practices are used
-   to sign and verify requests is outside the scope of this document,
-   but it is RECOMMENDED that parties follow best practices for
+   The cryptographic algorithms and key management practices used to
+   sign and verify requests are outside the scope of this document, but
+   it is RECOMMENDED that parties follow best practices for
    cryptographic security.
 
    *TODO*
@@ -1581,6 +1581,13 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
               <https://datatracker.ietf.org/doc/html/draft-ietf-rpp-
               json-00>.
 
+   [I-D.wullink-rpp-oauth2]
+              Wullink, M. and P. Kowalik, "OAuth 2.0 for RESTful
+              Provisioning Protocol (RPP)", Work in Progress, Internet-
+              Draft, draft-wullink-rpp-oauth2-00, 6 July 2026,
+              <https://datatracker.ietf.org/doc/html/draft-wullink-rpp-
+              oauth2-00>.
+
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
@@ -1590,10 +1597,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
               Resource Identifier (URI): Generic Syntax", STD 66,
               RFC 3986, DOI 10.17487/RFC3986, January 2005,
               <https://www.rfc-editor.org/info/rfc3986>.
-
-   [RFC6749]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
-              RFC 6749, DOI 10.17487/RFC6749, October 2012,
-              <https://www.rfc-editor.org/info/rfc6749>.
 
    [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
               DOI 10.17487/RFC7517, May 2015,
@@ -1615,9 +1618,6 @@ Acknowledgements
 
    *TODO*
 
-Authors' Addresses
-
-
 
 
 
@@ -1625,6 +1625,8 @@ Wullink & Kowalik          Expires 18 May 2027                 [Page 29]
 
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
+
+Authors' Addresses
 
    Maarten Wullink
    SIDN Labs
@@ -1636,8 +1638,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    DENIC
    Email: pawel.kowalik@denic.de
    URI:   https://denic.de/
-
-
 
 
 

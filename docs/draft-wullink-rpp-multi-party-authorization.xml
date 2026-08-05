@@ -24,7 +24,7 @@
 <middle>
 
 <section anchor="introduction"><name>Introduction</name>
-<t>The generic multi-party authorization flow described in this document allows registries to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrar and registrant's explicit consent is obtained before any RPP operations, described in <xref target="I-D.ietf-rpp-core"></xref>, are executed. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The 3rd party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties.</t>
+<t>The generic multi-party authorization flow described in this document allows registries to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrar and registrant's explicit consent is obtained before any RPP operations, described in <xref target="I-D.ietf-rpp-core"></xref>, are executed. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The 3rd party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties. How to secure the HTTP endpoints used in the multi-party authorization flow is out of scope for this document, but it is RECOMMENDED that OAuth 2.0 for RPP, as described in <xref target="I-D.wullink-rpp-oauth2"></xref>, be used.</t>
 <t><strong>TODO</strong> what about registries that allow direct registr access, without a registrar?</t>
 </section>
 
@@ -737,8 +737,8 @@ Content-Type: application/json
 <t>The registry MUST ensure that the registrar is the current sponsoring registrar of record for the domain name for which the RPP operation is requested, the sponsoring registrar may have changed between the time the request is created and the time the RPP operation, using the authorization request, is executed.</t>
 <t>The registry MUST check if the authorization request used to request an RPP operation is correctly signed by the registry itself and the registrar, and that the request is valid and not expired. The registry MUST reject any request with a missing or invalid signature, or that is invalid or expired. The Registry MUST check that the authorization request is used only once, when the <tt>use</tt> property is set to <tt>single-use</tt>. The registry MUST ensure that the authorization request is used only for the specific RPP operation for which it was created, and that the request is not used to authorize any other operation.</t>
 <t>Signature verification MUST be performed locally by each verifying party using the public key of the signer, rather than by querying the signer's system at verification time. In particular, the registrar MUST verify the registry's signature (and the registry's verification of the 3rd party's signature) using the registry's public key, and MUST NOT rely on a live call back to the registry to confirm that a signature is valid. The registry already re-verifies all signatures, when the fully-signed request is submitted for execution (see <xref target="architectural-overview"></xref>).</t>
-<t>This document does not specify any authorization and authentication mechanisms for the 3rd party, registry, and registrar to secure the HTTP endpoints used to exchange requests and responses. It is RECOMMENDED that parties follow best practices for securing HTTP endpoints, such as using TLS for end-to-end encryption, and OAUTH 2.0 <xref target="RFC6749"></xref> for authorization.</t>
-<t>What cryptographic algorithms and key management practices are used to sign and verify requests is outside the scope of this document, but it is RECOMMENDED that parties follow best practices for cryptographic security.</t>
+<t>This document does not specify any authorization and authentication mechanisms for the 3rd party, registry, and registrar to secure the HTTP endpoints used to exchange requests and responses. It is RECOMMENDED to use OAuth 2.0 for RPP, as described in <xref target="I-D.wullink-rpp-oauth2"></xref>.</t>
+<t>The cryptographic algorithms and key management practices used to sign and verify requests are outside the scope of this document, but it is RECOMMENDED that parties follow best practices for cryptographic security.</t>
 <t><strong>TODO</strong></t>
 </section>
 
@@ -904,9 +904,9 @@ Registration procedure: Expert Review
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-rpp-core.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-rpp-data-objects.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-rpp-json.xml"/>
+<xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.wullink-rpp-oauth2.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3986.xml"/>
-<xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6749.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7517.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8785.xml"/>
 </references>

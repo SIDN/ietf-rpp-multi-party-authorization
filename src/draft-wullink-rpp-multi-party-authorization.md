@@ -46,7 +46,7 @@ The traditional Registrar, Registry, and Registrant model for domain name manage
 
 # Introduction
 
-The generic multi-party authorization flow described in this document allows registries to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrar and registrant's explicit consent is obtained before any RPP operations, described in [@!I-D.ietf-rpp-core], are executed. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The 3rd party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties.
+The generic multi-party authorization flow described in this document allows registries to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrar and registrant's explicit consent is obtained before any RPP operations, described in [@!I-D.ietf-rpp-core], are executed. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The 3rd party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties. How to secure the HTTP endpoints used in the multi-party authorization flow is out of scope for this document, but it is RECOMMENDED that OAuth 2.0 for RPP, as described in [@!I-D.wullink-rpp-oauth2], be used.
 
 **TODO** what about registries that allow direct registr access, without a registrar?
 
@@ -703,9 +703,9 @@ The registry MUST check if the authorization request used to request an RPP oper
 
 Signature verification MUST be performed locally by each verifying party using the public key of the signer, rather than by querying the signer's system at verification time. In particular, the registrar MUST verify the registry's signature (and the registry's verification of the 3rd party's signature) using the registry's public key, and MUST NOT rely on a live call back to the registry to confirm that a signature is valid. The registry already re-verifies all signatures, when the fully-signed request is submitted for execution (see (#architectural-overview)).
 
-This document does not specify any authorization and authentication mechanisms for the 3rd party, registry, and registrar to secure the HTTP endpoints used to exchange requests and responses. It is RECOMMENDED that parties follow best practices for securing HTTP endpoints, such as using TLS for end-to-end encryption, and OAUTH 2.0 [@!RFC6749] for authorization.
+This document does not specify any authorization and authentication mechanisms for the 3rd party, registry, and registrar to secure the HTTP endpoints used to exchange requests and responses. It is RECOMMENDED to use OAuth 2.0 for RPP, as described in [@!I-D.wullink-rpp-oauth2].
 
-What cryptographic algorithms and key management practices are used to sign and verify requests is outside the scope of this document, but it is RECOMMENDED that parties follow best practices for cryptographic security.
+The cryptographic algorithms and key management practices used to sign and verify requests are outside the scope of this document, but it is RECOMMENDED that parties follow best practices for cryptographic security.
 
 **TODO**
 

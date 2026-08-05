@@ -123,7 +123,10 @@ Table of Contents
    relationship, how this trust is established is out of scope for this
    document.  The 3rd party does not have a direct trust relationship
    with the registrar, but the registrar trusts the registry to only
-   accept requests from accredited 3rd parties.
+   accept requests from accredited 3rd parties.  How to secure the HTTP
+   endpoints used in the multi-party authorization flow is out of scope
+   for this document, but it is RECOMMENDED that OAuth 2.0 for RPP, as
+   described in [I-D.wullink-rpp-oauth2], be used.
 
    *TODO* what about registries that allow direct registr access,
    without a registrar?
@@ -1084,13 +1087,12 @@ Table of Contents
    This document does not specify any authorization and authentication
    mechanisms for the 3rd party, registry, and registrar to secure the
    HTTP endpoints used to exchange requests and responses.  It is
-   RECOMMENDED that parties follow best practices for securing HTTP
-   endpoints, such as using TLS for end-to-end encryption, and OAUTH 2.0
-   [RFC6749] for authorization.
+   RECOMMENDED to use OAuth 2.0 for RPP, as described in
+   [I-D.wullink-rpp-oauth2].
 
-   What cryptographic algorithms and key management practices are used
-   to sign and verify requests is outside the scope of this document,
-   but it is RECOMMENDED that parties follow best practices for
+   The cryptographic algorithms and key management practices used to
+   sign and verify requests are outside the scope of this document, but
+   it is RECOMMENDED that parties follow best practices for
    cryptographic security.
 
    *TODO*
@@ -1253,6 +1255,13 @@ Table of Contents
               <https://datatracker.ietf.org/doc/html/draft-ietf-rpp-
               json-00>.
 
+   [I-D.wullink-rpp-oauth2]
+              Wullink, M. and P. Kowalik, "OAuth 2.0 for RESTful
+              Provisioning Protocol (RPP)", Work in Progress, Internet-
+              Draft, draft-wullink-rpp-oauth2-00, 6 July 2026,
+              <https://datatracker.ietf.org/doc/html/draft-wullink-rpp-
+              oauth2-00>.
+
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
@@ -1262,10 +1271,6 @@ Table of Contents
               Resource Identifier (URI): Generic Syntax", STD 66,
               RFC 3986, DOI 10.17487/RFC3986, January 2005,
               <https://www.rfc-editor.org/info/rfc3986>.
-
-   [RFC6749]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
-              RFC 6749, DOI 10.17487/RFC6749, October 2012,
-              <https://www.rfc-editor.org/info/rfc6749>.
 
    [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
               DOI 10.17487/RFC7517, May 2015,
