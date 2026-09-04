@@ -98,7 +98,7 @@ Table of Contents
      10.4.  Domain DNSSEC Update Request
      10.5.  Domain Transfer Request
    11. Security Considerations
-   12. RPP result codes
+   12. Result Codes
      12.1.  Client Errors
      12.2.  Server Errors
    13. IANA Considerations
@@ -1084,15 +1084,12 @@ Table of Contents
 
    *TODO*
 
-12.  RPP result codes
+12.  Result Codes
 
    This specification defines new RPP result codes for multi-party
-   authorization, used to indicate the result of creating an
-   authorization request, and of an RPP operation that was requested
-   using a multi-party authorization request.  These result codes follow
-   the result code classes defined in [I-D.ietf-rpp-core]: 14xxx for
-   client errors and 15xxx for server errors.  As described in
-   [I-D.ietf-rpp-core].
+   authorization, the new result codes follow the result code classes
+   defined in [I-D.ietf-rpp-core]: 14xxx for client errors and 15xxx for
+   server errors.  As described in [I-D.ietf-rpp-core].
 
 12.1.  Client Errors
 
@@ -1145,6 +1142,8 @@ Table of Contents
 
      Table 3: RPP multi-party authorization client error result codes
 
+   *TODO* complete the table with additional result codes
+
 12.2.  Server Errors
 
    The following server error result codes (class 15xxx) are defined in
@@ -1163,6 +1162,8 @@ Table of Contents
    +------------+--------------+---------------------------------------+
 
       Table 4: RPP multi-party authorization server error result codes
+
+   *TODO* complete the table with additional result codes
 
 13.  IANA Considerations
 

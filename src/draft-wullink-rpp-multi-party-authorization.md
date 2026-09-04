@@ -712,9 +712,9 @@ The cryptographic algorithms and key management practices used to sign and verif
 
 **TODO**
 
-# RPP result codes
+# Result Codes
 
-This specification defines new RPP result codes for multi-party authorization, used to indicate the result of creating an authorization request, and of an RPP operation that was requested using a multi-party authorization request. These result codes follow the result code classes defined in [@!I-D.ietf-rpp-core]: `14xxx` for client errors and `15xxx` for server errors. As described in [@!I-D.ietf-rpp-core].
+This specification defines new RPP result codes for multi-party authorization, the new result codes follow the result code classes defined in [@!I-D.ietf-rpp-core]: `14xxx` for client errors and `15xxx` for server errors. As described in [@!I-D.ietf-rpp-core].
 
 ## Client Errors
 
@@ -735,6 +735,8 @@ The following client error result codes (class `14xxx`) are defined in this docu
 Table: RPP multi-party authorization client error result codes
 {#tbl-rpp-client-errors}
 
+**TODO** complete the table with additional result codes
+
 ## Server Errors
 
 The following server error result codes (class `15xxx`) are defined in this document:
@@ -745,6 +747,8 @@ The following server error result codes (class `15xxx`) are defined in this docu
 | 15002 | 500 Internal Server Error | The registry was unable to retrieve or validate a registrar's public key. |
 Table: RPP multi-party authorization server error result codes
 {#tbl-rpp-server-errors}
+
+**TODO** complete the table with additional result codes
 
 # IANA Considerations
 

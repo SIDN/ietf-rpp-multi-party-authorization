@@ -114,7 +114,7 @@ Wullink & Kowalik          Expires 18 May 2027                  [Page 2]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
-   12. RPP result codes  . . . . . . . . . . . . . . . . . . . . . .  25
+   12. Result Codes  . . . . . . . . . . . . . . . . . . . . . . . .  25
      12.1.  Client Errors  . . . . . . . . . . . . . . . . . . . . .  25
      12.2.  Server Errors  . . . . . . . . . . . . . . . . . . . . .  27
    13. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  27
@@ -1353,20 +1353,20 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
    *TODO*
 
-12.  RPP result codes
+12.  Result Codes
 
    This specification defines new RPP result codes for multi-party
-   authorization, used to indicate the result of creating an
-   authorization request, and of an RPP operation that was requested
-   using a multi-party authorization request.  These result codes follow
-   the result code classes defined in [I-D.ietf-rpp-core]: 14xxx for
-   client errors and 15xxx for server errors.  As described in
-   [I-D.ietf-rpp-core].
+   authorization, the new result codes follow the result code classes
+   defined in [I-D.ietf-rpp-core]: 14xxx for client errors and 15xxx for
+   server errors.  As described in [I-D.ietf-rpp-core].
 
 12.1.  Client Errors
 
    The following client error result codes (class 14xxx) are defined in
    this document:
+
+
+
 
 
 
@@ -1448,7 +1448,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
      Table 3: RPP multi-party authorization client error result codes
 
-
+   *TODO* complete the table with additional result codes
 
 
 
@@ -1477,6 +1477,8 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
       Table 4: RPP multi-party authorization server error result codes
 
+   *TODO* complete the table with additional result codes
+
 13.  IANA Considerations
 
    IANA is requested to register the result codes defined in Table 3 and
@@ -1495,8 +1497,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    Registration procedure: Expert Review
 
    The following transaction types are defined in this document:
-
-
 
 
 

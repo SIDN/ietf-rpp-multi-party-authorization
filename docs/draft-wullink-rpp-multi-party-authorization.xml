@@ -744,8 +744,8 @@ Content-Type: application/json
 <t><strong>TODO</strong></t>
 </section>
 
-<section anchor="rpp-result-codes"><name>RPP result codes</name>
-<t>This specification defines new RPP result codes for multi-party authorization, used to indicate the result of creating an authorization request, and of an RPP operation that was requested using a multi-party authorization request. These result codes follow the result code classes defined in <xref target="I-D.ietf-rpp-core"></xref>: <tt>14xxx</tt> for client errors and <tt>15xxx</tt> for server errors. As described in <xref target="I-D.ietf-rpp-core"></xref>.</t>
+<section anchor="result-codes"><name>Result Codes</name>
+<t>This specification defines new RPP result codes for multi-party authorization, the new result codes follow the result code classes defined in <xref target="I-D.ietf-rpp-core"></xref>: <tt>14xxx</tt> for client errors and <tt>15xxx</tt> for server errors. As described in <xref target="I-D.ietf-rpp-core"></xref>.</t>
 
 <section anchor="client-errors"><name>Client Errors</name>
 <t>The following client error result codes (class <tt>14xxx</tt>) are defined in this document:</t>
@@ -819,7 +819,8 @@ Content-Type: application/json
 <td>The registrant did not approve the requested operation at the registrar's consent screen.</td>
 </tr>
 </tbody>
-</table></section>
+</table><t><strong>TODO</strong> complete the table with additional result codes</t>
+</section>
 
 <section anchor="server-errors"><name>Server Errors</name>
 <t>The following server error result codes (class <tt>15xxx</tt>) are defined in this document:</t>
@@ -845,7 +846,8 @@ Content-Type: application/json
 <td>The registry was unable to retrieve or validate a registrar's public key.</td>
 </tr>
 </tbody>
-</table></section>
+</table><t><strong>TODO</strong> complete the table with additional result codes</t>
+</section>
 </section>
 
 <section anchor="iana-considerations"><name>IANA Considerations</name>
