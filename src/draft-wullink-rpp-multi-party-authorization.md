@@ -80,6 +80,8 @@ In examples, indentation and white space are provided only to illustrate element
 
 RPP enables registries to securely delegate domain management functions to accredited third-party service providers, such as DNS hosting providers.
 
+## Authorization Request
+
 The authorization of such a delegated operation requires the explicit participation of four parties: the registrant, the third party performing the operation, the registry, and the registrar managing the object resource. The registry and the registrar each apply their own digital signature to the authorization request, the operation MUST only be executed once both signatures have been verified.
 
 The diagram in (#fig-mpa-flow) illustrates the multi-party authorization flow:
@@ -129,19 +131,11 @@ The diagram in (#fig-mpa-flow) illustrates the multi-party authorization flow:
      |               |               |               |
      |               |               | 11. Verify all|
      |               |               |  signatures & |
-     |               |               |  execute op.  |
+     |               |               |  create       |
+     |               |               |  authorisation|
      |               |               |               |
-     |               | 12. Execution |               |
-     |               |  result       |               |
-     |               |<--------------|               |
-     |               |               |               |
-     |               |               | 13. Inform    |
-     |               |               |  registrar of |
-     |               |               |  result       |
-     |               |               +-------------->|
-     |               |               |               |
-     | 14. Operation |               |               |
-     |  confirmed    |               |               |
+     | 12. Auth.     |               |               |
+     |  granted      |               |               |
      |<--------------|               |               |
      |               |               |               |
 ```
@@ -158,11 +152,21 @@ The individual steps in the diagram (#fig-mpa-flow) performed by each party are 
 7. The registrar validates the signature of the registry, and checks if the request is valid and allowed per the registrar's policies. The registrar then presents the requested operation to the registrant for approval. If the registrant approves, the registrar signs the response with its own signature.
 8. The registrar redirects the client's browser back to the third party.
 9. The client's browser follows the redirect, delivering the request signed by the registry and the registrar to the third party.
-10. The third party submits the request for the RPP operation to the registry, attaching the fully-signed authorisation request in the `RPP-Multi-Party-Auth` HTTP header.
-11. The registry verifies the signatures of the registry itself and the registrar. The registry executes the requested operation only if both signatures are present and valid.
-12. The registry returns the result of the operation to the third party.
-13. The registry informs the registrar of the result of the operation, so that the registrar can update its records accordingly.
-14. The third party informs the client that the requested operation has been completed.
+10. The third party submits the authorization request to the registry, including the signatures of both the registry and the registrar.
+11. The registry verifies the signatures of the registry itself and the registrar. The registry creates an Authorisation Data Object, which is stored in the registry's database and used to authorize future operations.
+12. The third party informs the client that the requested authorisation has been granted.
+
+## Authorization Usage
+
+After the multi-party authorization flow is completed, the registry MUST use the Authorisation Data Object to authorize an operation request by a 3rd party. If the object in the request of a 3rd party is linked to a valid Authorisation Data Object, the registry MUST execute the requested operation and return the result to the 3rd party. If there is no Authorisation Data Object or it is invalid, the registry MUST reject the request and return an appropriate error response to the 3rd party.
+
+**TODO** add diagragm showing how the Authorisation Data Object is used to authorize an operation request by a 3rd party.
+
+## Authorization Management
+
+An authorization granted by the registry MAY be terminated by the 3rd party, the registrar or the registry at any time, before the expiration of the Authorisation Data Object.
+
+**TODO** add diagragm showing how the Authorisation Data Object is revoked by the registrar or registry or rescinded by the 3rd party.
 
 # Data Objects
 
@@ -197,7 +201,7 @@ This section describes the data elements of the Authorisation Data Object, as de
 - `requestorName`: The name of the requestor.
 - `approvalUrl`: The URI to which the client should be redirected for multi-party approval. MUST only be used when the referenced organisation is a registrar or reseller supporting multi-party approval.
 - `returnUrl`: The URI to which the client should be redirected after multi-party approval at the registrar. MUST only be used when the referenced organisation is a 3rd party supporting multi-party approval.
-- `usage`: The usage type for the authorisation request. MUST be one of `"single-use"` or `"multi-use"`.
+- `usage`: The usage type for the authorisation request. MUST be one of `"single-use"` or `"multi-use"`, the default being `"single-use"`.
 - `data`: The data associated with the authorisation request, containing the RPP request body for the operation identified by `transactionType`; MUST be a valid RPP Data Object, see (#transaction-types).
 - `signatures`: The digital signatures applied to the authorisation request, used to verify its authenticity and integrity, see (#request-signing-and-verification).
 - `approval`: The approval information for the authorisation request.
@@ -329,15 +333,33 @@ The request is initiated by the 3rd party, and validated and processed by both t
 
 ## Third Party
 
-The 3rd party constructs the request, setting the `transactionType`, `objectId`, and `data` properties, and sends the request to the registry.
+The 3rd party constructs the request, setting the `transactionType`, `objectId`, `expiration` and `data` properties, and sends the request to the registry.
 
 ## Registry
 
-The registry, after validation of the request, adds the following properties to the request: `id`, `requestorId`, `requestorName`, `approvalUrl`, `returnUrl`, `timestamp`, `expiration`, `signatures`. The `id` is a unique identifier for the transaction. The `requestorId` is the identifier of the 3rd party that created the request, the `requestorName` is the public name of the requestor to be displayed in the consent screen. The `approvalUrl` is the URL where the request can be approved, the `returnUrl` is the URL to return to after approval, the `timestamp` is the time the request was created, the `expiration` is the time the request expires, the `signatures` contain the cryptographic signatures, the registry MUST add its signature of the request to the `signatures` array, it MUST be the first element in the array.
+The registry, after validation of the request, adds the following properties to the request: `id`, `requestorId`, `requestorName`, `approvalUrl`, `returnUrl`, `timestamp`,`signatures`. The `id` is a unique identifier for the transaction. The `requestorId` is the identifier of the 3rd party that created the request, the `requestorName` is the public name of the requestor to be displayed in the consent screen. The `approvalUrl` is the URL where the request can be approved, the `returnUrl` is the URL to return to after approval, the `timestamp` is the time the request was created, the `expiration` is the time the request expires, the `signatures` contain the cryptographic signatures, the registry MUST add its signature of the request to the `signatures` array, it MUST be the first element in the array.
 
 ## Registrar
 
 The registrar adds the `approval` object to the request, to indicate whether the registrant and registrar have approved the transfer; at minimum, `approval.approved` and `approval.approvedBy` MUST be set. The registrar also adds its signature and public key identifier to the `signatures` array in the request, it MUST be the second element in the array. The registrar MUST verify the signature of the registry using the public key linked to the public key identifier in the request.
+
+# Approval Lifecycle
+
+The `expiration` property of the Authorisation Data Object indicates the time the approved request expires. The registry and registrar MUST reject any request that has expired, and return an appropriate error response to the 3rd party. The 3rd party MUST ensure that the request is submitted to the registry before it expires.
+
+The registry MAY set a maximum expiration time for requests, and reject any request that exceeds this limit. The registrar MAY also set a maximum expiration time for requests, and reject any request that exceeds this limit.
+
+The `usage` property of the Authorisation Data Object indicates whether the request is a single-use or multi-use request. The registry MUST keep track of the usage of the request, and reject any request that has already been used if it is a single-use request.
+
+The 3rd party may rescind an approval it has previously granted, at any point while the authorisation remains valid, to immediately terminate its ongoing access to the object. The registry MUST check if the authorisation is linked to the 3rd party, and if so, it MUST invalidate the Authorisation Data Object and reject any subsequent RPP operation request that relies on it.
+
+The registrar MAY rescind an approval it has previously granted, at any point while the authorisation remains valid, to immediately terminate the 3rd party's ongoing access to the object. This is particularly relevant for `"multi-use"` requests, which by design grant the 3rd party continuing access to perform the authorised operation on the object until the request expires or is rescinded.
+
+To rescind an approval, the registrar sends a revocation request to the registry, identifying the Authorisation Data Object by its `id` and signed by the registrar using the same key used to approve the original request. Upon receiving a valid, signed revocation request, the registry MUST immediately invalidate the referenced Authorisation Data Object, regardless of its `expiration` or remaining uses, and MUST reject any subsequent RPP operation request that relies on it.
+
+The registrar MAY rescind an approval, for any object under its management, for any reason, including but not limited to: the registrant revoking consent, a change in the registrant's circumstances, or a violation of the registrar's policies by the 3rd party. The registry MAY also rescind an approval if it determines that the 3rd party is no longer accredited or if it detects suspicious or malicious activity.
+
+The registry MUST inform the 3rd party that the authorisation has been rescinded, so that the 3rd party can stop relying on it and, where applicable, notify its own client.
 
 # Request Signing and Verification
 
@@ -426,7 +448,7 @@ The registrar inserts the signature as an object in the `signatures` array.
 
 - `rpp:mpa-type:domain:ns-update`
 - `rpp:mpa-type:domain:dnssec-update`
-- `rpp:mpa-type:domain:transfer`.
+- `rpp:mpa-type:domain:transfer`
 
 This specification does not define a separate payload format for the RPP operation being authorized. Instead, the `data` property of a transaction request MUST contain the same JSON request message that would normally be sent directly to the RPP server for the corresponding operation, using the mapping rules and object representations defined in [@!I-D.ietf-rpp-json].
 
@@ -456,40 +478,31 @@ The `rpp:mpa-type:domain:transfer` transaction type is used to transfer the spon
 
 ## Endpoints
 
+The following non normative table lists RPP endpoints related to Authorisation Objects, each derived by applying the rules defined in section "HTTP Mapping Rules" in [@!I-D.ietf-rpp-core].
+
+| Operation | HTTP Method | URL path |
+|---|---|---|
+| Authorisation: create | `"POST"` | `"/{collection}/{id}/authorisations"` |
+| Authorisation: read | `"GET"` | `"/{collection}/{id}/authorisations/latest"` |
+| Authorisation: read | `"GET"` | `"/{collection}/{id}/authorisations/{id}"` |
+| Authorisation: delete | `"DELETE"` | `"/{collection}/{id}/authorisations/{id}"` |
+| Authorisation: list | `"GET"` | `"/{collection}/{id}/authorisations"` |
+Table: Authorisation Endpoints
+{#tbl-authorisation-endpoints}
+{#tbl-authorisation-process-endpoints}
+
 The following non normative table lists RPP endpoints related to authorisation processes, each derived by applying the rules defined in section "HTTP Mapping Rules" in [@!I-D.ietf-rpp-core].
 
 | Operation | HTTP Method | URL path |
 |---|---|---|
-| Authorisation: create | `"POST"` | `"/{collection}/{id}/processes/authorisationProcesses"` |
-| Authorisation: read | `"GET"` | `"/{collection}/{id}/processes/authorisationProcesses/latest"` |
-| Authorisation: read | `"GET"` | `"/{collection}/{id}/processes/authorisationProcesses/{id}"` |
-| Authorisation: list | `"GET"` | `"/{collection}/{id}/processes/authorisationProcesses"` |
+| Authorisation Process: create | `"POST"` | `"/{collection}/{id}/processes/authorisationProcesses"` |
+| Authorisation Process: read | `"GET"` | `"/{collection}/{id}/processes/authorisationProcesses/latest"` |
+| Authorisation Process: read | `"GET"` | `"/{collection}/{id}/processes/authorisationProcesses/{id}"` |
+| Authorisation Process: list | `"GET"` | `"/{collection}/{id}/processes/authorisationProcesses"` |
 Table: Authorisation Process Endpoints
 {#tbl-authorisation-process-endpoints}
 
 **TODO**
-
-## Request Header
-
-The `RPP-Multi-Party-Auth` MUST be used by the 3rd party when submitting an RPP request for an authorized operation to the registry. Without this header, the registry MUST reject the request with a `400 Bad Request` response.
-
-The value of the `RPP-Multi-Party-Auth` header is a base64 encoded string that represents the signed approval response received from the registrar, the header uses the following ABNF syntax:
-
-```abnf
-Approval = "RPP-Multi-Party-Auth" ":" SP approval-token
-approval-token = 1*CHAR
-```
-
-Example HTTP request using the `RPP-Multi-Party-Auth` header in a domain update operation, to update the DNS records for a domain object:
-
-```http
-PATCH /domainNames/test1.example HTTP/1.1
-RPP-Multi-Party-Auth: <rpp-mpa-token>
-Authorization: Bearer <access-token>
-Content-Type: application/json
-
-**TODO** messagebody here
-```
 
 # Examples
 
@@ -692,7 +705,7 @@ This response is sent to the registry to request execution of the transfer:
 }
 ```
 
-This response is used by the 3rd party to submit the transfer request to the registry, using the `RPP-Multi-Party-Auth` HTTP header. The registry verifies the signatures of the registry and registrar, and confirms that `approval.approved` is set to `true`. If both signatures are valid and the approval is granted, the registry executes the transfer operation and returns the result to the 3rd party.
+This response is used by the 3rd party to submit the transfer request to the registry, The registry verifies the signatures of the registry and registrar, and confirms that `approval.approved` is set to `true`. If both signatures are valid and the approval is granted, the registry MUST create an authorization object, allowing the transfer operation to be executed, and return a success response to the 3rd party. The 3rd party can then submit the transfer request to the registry, which will execute the transfer operation.
 
 # Security Considerations
 
