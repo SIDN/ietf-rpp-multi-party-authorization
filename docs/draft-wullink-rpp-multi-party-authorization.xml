@@ -315,8 +315,27 @@
 </ul>
 </section>
 
+<section anchor="status-object"><name>Status Object</name>
+
+<ul spacing="compact">
+<li>Name: Status Object</li>
+<li>Identifier: status</li>
+<li>Description: Represents the lifecycle status of an Authorisation Data Object, as described in <xref target="fig-authorisation-lifecycle"></xref>.</li>
+<li>Data Type: String (enum)</li>
+<li><t>Allowed Values:</t>
+
+<ul spacing="compact">
+<li><tt>&quot;Pending&quot;</tt> - The Authorisation Data Object has been created and is awaiting the registrar's approval decision.</li>
+<li><tt>&quot;Approved&quot;</tt> - The requested operation has been approved by the registrar and MAY be executed by the 3rd party.</li>
+<li><tt>&quot;Used&quot;</tt> - The authorisation has been consumed by a single-use RPP operation and can no longer be used.</li>
+<li><tt>&quot;Invalid&quot;</tt> - The authorisation is no longer valid, because it has expired, been rescinded by the 3rd party or registrar, or been consumed as a single-use authorisation.</li>
+</ul></li>
+<li>Constraints: MUST be one of the values listed above.</li>
+</ul>
+</section>
+
 <section anchor="component-data-objects-json-schema"><name>JSON Schema</name>
-<t>This section provides normative JSON Schema definitions for the Public Key, Signature, and Approval component objects described above. All schemas use JSON Schema draft 2020-12 <xref target="JSON-SCHEMA"></xref>. Per Rule 20 of <xref target="I-D.ietf-rpp-json"></xref>, these <tt>$defs</tt> entries share the <tt>$id</tt> of the schema document defined by this specification, so they are part of the same JSON Schema document as the Authorisation Data Object schema in <xref target="authorisation-data-object-json-schema"></xref> and the Organisation Data Object extension schema in the Organization Data Object section, and can be referenced from both via <tt>$ref</tt>.</t>
+<t>This section provides normative JSON Schema definitions for the Public Key, Signature, Approval, and Status component objects described above. All schemas use JSON Schema draft 2020-12 <xref target="JSON-SCHEMA"></xref>. Per Rule 20 of <xref target="I-D.ietf-rpp-json"></xref>, these <tt>$defs</tt> entries share the <tt>$id</tt> of the schema document defined by this specification, so they are part of the same JSON Schema document as the Authorisation Data Object schema in <xref target="authorisation-data-object-json-schema"></xref> and the Organisation Data Object extension schema in the Organization Data Object section, and can be referenced from both via <tt>$ref</tt>.</t>
 
 <sourcecode type="json"><![CDATA[{
   "$defs": {
@@ -351,6 +370,10 @@
         "timestamp":  { "type": "string", "format": "date-time" }
       },
       "required": ["approved", "approvedBy", "timestamp"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["Pending", "Approved", "Used", "Invalid"]
     }
   }
 }
@@ -416,7 +439,7 @@
 <ul spacing="compact">
 <li>Identifier: requestorId</li>
 <li>Cardinality: 1</li>
-<li>Mutability: create-only</li>
+<li>Mutability: read-only</li>
 <li>Data Type: identifier</li>
 <li>Description: The unique organisation identifier of the organisation that created the authorisation request</li>
 <li>Constraints: (none)</li>
@@ -426,7 +449,7 @@
 <ul spacing="compact">
 <li>Identifier: requestorName</li>
 <li>Cardinality: 1</li>
-<li>Mutability: create-only</li>
+<li>Mutability: read-only</li>
 <li>Data Type: string</li>
 <li>Description: The name of the organisation that created the authorisation request</li>
 <li>Constraints: (none)</li>
@@ -470,6 +493,16 @@
 <li>Data Type: string</li>
 <li>Description: The usage type for the authorisation request.</li>
 <li>Constraints: MUST be one of <tt>&quot;single-use&quot;</tt> or <tt>&quot;multi-use&quot;</tt>, the default being <tt>&quot;single-use&quot;</tt>.</li>
+</ul></li>
+<li><t>Status</t>
+
+<ul spacing="compact">
+<li>Identifier: status</li>
+<li>Cardinality: 1</li>
+<li>Mutability: read-only</li>
+<li>Data Type: Status Object</li>
+<li>Description: The current lifecycle status of the authorisation, as described in <xref target="fig-authorisation-lifecycle"></xref>.</li>
+<li>Constraints: MUST be one of the values defined for the Status Object. The value is set by the registry and cannot be specified by the client.</li>
 </ul></li>
 </ul></li>
 </ul>
@@ -583,6 +616,12 @@
 <td>Registrar</td>
 <td>Registry, 3rd party</td>
 </tr>
+
+<tr>
+<td><tt>status</tt></td>
+<td>Registry</td>
+<td>3rd party, Registrar</td>
+</tr>
 </tbody>
 </table></section>
 
@@ -611,9 +650,10 @@
           "items": { "$ref": "#/$defs/signature" },
           "minItems": 0
         },
-        "approval": { "$ref": "#/$defs/approval" }
+        "approval": { "$ref": "#/$defs/approval" },
+        "status": { "$ref": "#/$defs/status" }
       },
-      "required": ["@type", "transactionType", "timestamp", "expiration", "objectId", "requestorId"]
+      "required": ["@type", "transactionType", "timestamp", "expiration", "objectId", "requestorId", "status"]
     }
   }
 }
@@ -866,7 +906,17 @@ TODO: define an IANA registry for user roles?</t>
 <section anchor="authorisation-lifecycle"><name>Authorisation Lifecycle</name>
 <t>The diagram in <xref target="fig-authorisation-lifecycle"></xref> illustrates the states of an Authorisation Data Object over its lifetime.</t>
 <figure anchor="fig-authorisation-lifecycle"><name>Authorisation Data Object lifecycle </name>
-<sourcecode type="ascii"><![CDATA[                     +-----------------------+
+<sourcecode type="ascii"><![CDATA[                                 |
+                                 | 3rd party requests authorisation
+                                 v
+                     +-----------------------+
+                     |  active Authorisation  |  yes  +------------------+
+                     |  already exists?       |------>| Request Rejected |
+                     +-----------+-----------+        +------------------+
+                                 |
+                                 | no
+                                 v
+                     +-----------------------+
                      |        Pending        |
                      +-----------+-----------+
                                  |
@@ -897,6 +947,7 @@ TODO: define an IANA registry for user roles?</t>
 ]]>
 </sourcecode>
 </figure>
+<t>A data object SHOULD have no more than one active Authorisation Data Object for a given <tt>transactionType</tt> and <tt>objectId</tt>, as shown by the <tt>Request Rejected</tt> outcome in <xref target="fig-authorisation-lifecycle"></xref>. The registry MUST reject any request that would create a new Authorisation Data Object for the same <tt>transactionType</tt> and <tt>objectId</tt> if an existing Authorisation Data Object is still in the <tt>Pending</tt> or <tt>Approved</tt> state.</t>
 <t>The <tt>Invalid</tt> state shown above is also reached directly from the <tt>Pending</tt> or <tt>Approved</tt> state, without an RPP operation being executed, whenever: the <tt>expiration</tt> time is reached; the 3rd party rescinds its approval; or the registrar rescinds its approval, as described below.</t>
 <t>The <tt>expiration</tt> property of the Authorisation Data Object indicates the time the approved request expires. The registry MUST reject any request that has expired, and return an appropriate error response to the 3rd party. The 3rd party MUST ensure that the request is submitted to the registry before it expires.</t>
 <t>The registry MAY set a maximum expiration time for requests, and reject any request that exceeds this limit. The registrar MAY also set a maximum expiration time for requests, and reject any request that exceeds this limit.</t>

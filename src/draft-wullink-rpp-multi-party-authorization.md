@@ -285,9 +285,22 @@ The individual steps in the diagram (#fig-mpa-flow) performed by each party are 
     * Description: The date and time at which the approval decision was made.
     * Constraints: (none)
 
+### Status Object
+
+* Name: Status Object
+* Identifier: status
+* Description: Represents the lifecycle status of an Authorisation Data Object, as described in (#fig-authorisation-lifecycle).
+* Data Type: String (enum)
+* Allowed Values:
+  * `"Pending"` - The Authorisation Data Object has been created and is awaiting the registrar's approval decision.
+  * `"Approved"` - The requested operation has been approved by the registrar and MAY be executed by the 3rd party.
+  * `"Used"` - The authorisation has been consumed by a single-use RPP operation and can no longer be used.
+  * `"Invalid"` - The authorisation is no longer valid, because it has expired, been rescinded by the 3rd party or registrar, or been consumed as a single-use authorisation.
+* Constraints: MUST be one of the values listed above.
+
 ### JSON Schema {#component-data-objects-json-schema}
 
-This section provides normative JSON Schema definitions for the Public Key, Signature, and Approval component objects described above. All schemas use JSON Schema draft 2020-12 [@?JSON-SCHEMA]. Per Rule 20 of [@!I-D.ietf-rpp-json], these `$defs` entries share the `$id` of the schema document defined by this specification, so they are part of the same JSON Schema document as the Authorisation Data Object schema in (#authorisation-data-object-json-schema) and the Organisation Data Object extension schema in the Organization Data Object section, and can be referenced from both via `$ref`.
+This section provides normative JSON Schema definitions for the Public Key, Signature, Approval, and Status component objects described above. All schemas use JSON Schema draft 2020-12 [@?JSON-SCHEMA]. Per Rule 20 of [@!I-D.ietf-rpp-json], these `$defs` entries share the `$id` of the schema document defined by this specification, so they are part of the same JSON Schema document as the Authorisation Data Object schema in (#authorisation-data-object-json-schema) and the Organisation Data Object extension schema in the Organization Data Object section, and can be referenced from both via `$ref`.
 
 ```json
 {
@@ -323,6 +336,10 @@ This section provides normative JSON Schema definitions for the Public Key, Sign
         "timestamp":  { "type": "string", "format": "date-time" }
       },
       "required": ["approved", "approvedBy", "timestamp"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["Pending", "Approved", "Used", "Invalid"]
     }
   }
 }
@@ -370,14 +387,14 @@ This specification defines a new Authorisation Process Object...
   * Requestor Id
     * Identifier: requestorId
     * Cardinality: 1
-    * Mutability: create-only
+    * Mutability: read-only
     * Data Type: identifier
     * Description: The unique organisation identifier of the organisation that created the authorisation request
     * Constraints: (none)
   * Requestor Name
     * Identifier: requestorName
     * Cardinality: 1
-    * Mutability: create-only
+    * Mutability: read-only
     * Data Type: string
     * Description: The name of the organisation that created the authorisation request
     * Constraints: (none)
@@ -406,6 +423,13 @@ This specification defines a new Authorisation Process Object...
     * Data Type: string
     * Description: The usage type for the authorisation request.
     * Constraints: MUST be one of `"single-use"` or `"multi-use"`, the default being `"single-use"`.
+  * Status
+    * Identifier: status
+    * Cardinality: 1
+    * Mutability: read-only
+    * Data Type: Status Object
+    * Description: The current lifecycle status of the authorisation, as described in (#fig-authorisation-lifecycle).
+    * Constraints: MUST be one of the values defined for the Status Object. The value is set by the registry and cannot be specified by the client.
 
 **TODO** use reference to organisation object for requestorId and requestorName, or keep them as separate fields?
 
@@ -449,6 +473,7 @@ The Authorisation Data Object elements are set by different parties involved in 
 | `usage` | 3rd party | Registry, Registrar |
 | `signatures` | Registry, Registrar | Registry, Registrar |
 | `approval` | Registrar | Registry, 3rd party |
+| `status` | Registry | 3rd party, Registrar |
 Table: Party responsible for setting and reading each data element
 {#tbl-authorisation-party-usage}
 
@@ -479,9 +504,10 @@ This section provides normative JSON Schema definitions for the transaction type
           "items": { "$ref": "#/$defs/signature" },
           "minItems": 0
         },
-        "approval": { "$ref": "#/$defs/approval" }
+        "approval": { "$ref": "#/$defs/approval" },
+        "status": { "$ref": "#/$defs/status" }
       },
-      "required": ["@type", "transactionType", "timestamp", "expiration", "objectId", "requestorId"]
+      "required": ["@type", "transactionType", "timestamp", "expiration", "objectId", "requestorId", "status"]
     }
   }
 }
@@ -687,6 +713,16 @@ The registrar adds the `approval` object to the request, to indicate whether the
 The diagram in (#fig-authorisation-lifecycle) illustrates the states of an Authorisation Data Object over its lifetime.
 
 ```ascii
+                                 |
+                                 | 3rd party requests authorisation
+                                 v
+                     +-----------------------+
+                     |  active Authorisation  |  yes  +------------------+
+                     |  already exists?       |------>| Request Rejected |
+                     +-----------+-----------+        +------------------+
+                                 |
+                                 | no
+                                 v
                      +-----------------------+
                      |        Pending        |
                      +-----------+-----------+
@@ -718,6 +754,8 @@ The diagram in (#fig-authorisation-lifecycle) illustrates the states of an Autho
 ```
 Figure: Authorisation Data Object lifecycle {#fig-authorisation-lifecycle}
 
+A data object SHOULD have no more than one active Authorisation Data Object for a given `transactionType` and `objectId`, as shown by the `Request Rejected` outcome in (#fig-authorisation-lifecycle). The registry MUST reject any request that would create a new Authorisation Data Object for the same `transactionType` and `objectId` if an existing Authorisation Data Object is still in the `Pending` or `Approved` state.
+
 The `Invalid` state shown above is also reached directly from the `Pending` or `Approved` state, without an RPP operation being executed, whenever: the `expiration` time is reached; the 3rd party rescinds its approval; or the registrar rescinds its approval, as described below.
 
 The `expiration` property of the Authorisation Data Object indicates the time the approved request expires. The registry MUST reject any request that has expired, and return an appropriate error response to the 3rd party. The 3rd party MUST ensure that the request is submitted to the registry before it expires.
@@ -735,8 +773,6 @@ To rescind an approval, the registrar sends a revocation request to the registry
 The registrar MAY rescind an approval, for any object under its management, for any reason, including but not limited to: the registrant revoking consent, a change in the registrant's circumstances, or a violation of the registrar's policies by the 3rd party. The registry MAY also rescind an approval if it determines that the 3rd party is no longer accredited or if it detects suspicious or malicious activity.
 
 The registry MUST inform the 3rd party that the authorisation has been rescinded, so that the 3rd party can stop relying on it and, where applicable, notify its own client.
-
-
 
 # Request Signing and Verification
 

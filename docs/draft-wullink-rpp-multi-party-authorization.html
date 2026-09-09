@@ -1340,7 +1340,10 @@ li > p:last-of-type:only-child {
                     <p id="section-toc.1-1.5.2.1.2.3.1"><a href="#section-5.1.3" class="auto internal xref">5.1.3</a>.  <a href="#name-approval-object" class="internal xref">Approval Object</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1.2.4">
-                    <p id="section-toc.1-1.5.2.1.2.4.1"><a href="#section-5.1.4" class="auto internal xref">5.1.4</a>.  <a href="#name-json-schema" class="internal xref">JSON Schema</a></p>
+                    <p id="section-toc.1-1.5.2.1.2.4.1"><a href="#section-5.1.4" class="auto internal xref">5.1.4</a>.  <a href="#name-status-object" class="internal xref">Status Object</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1.2.5">
+                    <p id="section-toc.1-1.5.2.1.2.5.1"><a href="#section-5.1.5" class="auto internal xref">5.1.5</a>.  <a href="#name-json-schema" class="internal xref">JSON Schema</a></p>
 </li>
                 </ul>
 </li>
@@ -2002,13 +2005,49 @@ li > p:last-of-type:only-child {
           </ul>
 </section>
 </div>
-<div id="component-data-objects-json-schema">
+<div id="status-object">
 <section id="section-5.1.4">
-          <h4 id="name-json-schema">
-<a href="#section-5.1.4" class="section-number selfRef">5.1.4. </a><a href="#name-json-schema" class="section-name selfRef">JSON Schema</a>
+          <h4 id="name-status-object">
+<a href="#section-5.1.4" class="section-number selfRef">5.1.4. </a><a href="#name-status-object" class="section-name selfRef">Status Object</a>
           </h4>
-<p id="section-5.1.4-1">This section provides normative JSON Schema definitions for the Public Key, Signature, and Approval component objects described above. All schemas use JSON Schema draft 2020-12 <span>[<a href="#JSON-SCHEMA" class="cite xref">JSON-SCHEMA</a>]</span>. Per Rule 20 of <span>[<a href="#I-D.ietf-rpp-json" class="cite xref">I-D.ietf-rpp-json</a>]</span>, these <code>$defs</code> entries share the <code>$id</code> of the schema document defined by this specification, so they are part of the same JSON Schema document as the Authorisation Data Object schema in <a href="#authorisation-data-object-json-schema" class="auto internal xref">Section 5.2.3</a> and the Organisation Data Object extension schema in the Organization Data Object section, and can be referenced from both via <code>$ref</code>.<a href="#section-5.1.4-1" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-5.1.4-2">
+<ul class="compact">
+<li class="compact" id="section-5.1.4-1.1">Name: Status Object<a href="#section-5.1.4-1.1" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-5.1.4-1.2">Identifier: status<a href="#section-5.1.4-1.2" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-5.1.4-1.3">Description: Represents the lifecycle status of an Authorisation Data Object, as described in <a href="#fig-authorisation-lifecycle" class="auto internal xref">Figure 2</a>.<a href="#section-5.1.4-1.3" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-5.1.4-1.4">Data Type: String (enum)<a href="#section-5.1.4-1.4" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-5.1.4-1.5">
+              <p id="section-5.1.4-1.5.1">Allowed Values:<a href="#section-5.1.4-1.5.1" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-5.1.4-1.5.2.1">
+                  <code>"Pending"</code> - The Authorisation Data Object has been created and is awaiting the registrar's approval decision.<a href="#section-5.1.4-1.5.2.1" class="pilcrow">¶</a>
+</li>
+                <li class="compact" id="section-5.1.4-1.5.2.2">
+                  <code>"Approved"</code> - The requested operation has been approved by the registrar and MAY be executed by the 3rd party.<a href="#section-5.1.4-1.5.2.2" class="pilcrow">¶</a>
+</li>
+                <li class="compact" id="section-5.1.4-1.5.2.3">
+                  <code>"Used"</code> - The authorisation has been consumed by a single-use RPP operation and can no longer be used.<a href="#section-5.1.4-1.5.2.3" class="pilcrow">¶</a>
+</li>
+                <li class="compact" id="section-5.1.4-1.5.2.4">
+                  <code>"Invalid"</code> - The authorisation is no longer valid, because it has expired, been rescinded by the 3rd party or registrar, or been consumed as a single-use authorisation.<a href="#section-5.1.4-1.5.2.4" class="pilcrow">¶</a>
+</li>
+              </ul>
+</li>
+            <li class="compact" id="section-5.1.4-1.6">Constraints: MUST be one of the values listed above.<a href="#section-5.1.4-1.6" class="pilcrow">¶</a>
+</li>
+          </ul>
+</section>
+</div>
+<div id="component-data-objects-json-schema">
+<section id="section-5.1.5">
+          <h4 id="name-json-schema">
+<a href="#section-5.1.5" class="section-number selfRef">5.1.5. </a><a href="#name-json-schema" class="section-name selfRef">JSON Schema</a>
+          </h4>
+<p id="section-5.1.5-1">This section provides normative JSON Schema definitions for the Public Key, Signature, Approval, and Status component objects described above. All schemas use JSON Schema draft 2020-12 <span>[<a href="#JSON-SCHEMA" class="cite xref">JSON-SCHEMA</a>]</span>. Per Rule 20 of <span>[<a href="#I-D.ietf-rpp-json" class="cite xref">I-D.ietf-rpp-json</a>]</span>, these <code>$defs</code> entries share the <code>$id</code> of the schema document defined by this specification, so they are part of the same JSON Schema document as the Authorisation Data Object schema in <a href="#authorisation-data-object-json-schema" class="auto internal xref">Section 5.2.3</a> and the Organisation Data Object extension schema in the Organization Data Object section, and can be referenced from both via <code>$ref</code>.<a href="#section-5.1.5-1" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-5.1.5-2">
 <pre>{
   "$defs": {
     "publicKey": {
@@ -2042,13 +2081,17 @@ li > p:last-of-type:only-child {
         "timestamp":  { "type": "string", "format": "date-time" }
       },
       "required": ["approved", "approvedBy", "timestamp"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["Pending", "Approved", "Used", "Invalid"]
     }
   }
 }
 
-</pre><a href="#section-5.1.4-2" class="pilcrow">¶</a>
+</pre><a href="#section-5.1.5-2" class="pilcrow">¶</a>
 </div>
-<p id="section-5.1.4-3">Consistent with Rule 24 of <span>[<a href="#I-D.ietf-rpp-json" class="cite xref">I-D.ietf-rpp-json</a>]</span>, none of these component object definitions use <code>"additionalProperties": false</code> or <code>"unevaluatedProperties": false</code>, so that extensions MAY add further properties to any of them, following the Additive Schema Composition method defined in <span>[<a href="#I-D.wullink-rpp-extension-guidelines" class="cite xref">I-D.wullink-rpp-extension-guidelines</a>]</span>.<a href="#section-5.1.4-3" class="pilcrow">¶</a></p>
+<p id="section-5.1.5-3">Consistent with Rule 24 of <span>[<a href="#I-D.ietf-rpp-json" class="cite xref">I-D.ietf-rpp-json</a>]</span>, none of these component object definitions use <code>"additionalProperties": false</code> or <code>"unevaluatedProperties": false</code>, so that extensions MAY add further properties to any of them, following the Additive Schema Composition method defined in <span>[<a href="#I-D.wullink-rpp-extension-guidelines" class="cite xref">I-D.wullink-rpp-extension-guidelines</a>]</span>.<a href="#section-5.1.5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2146,7 +2189,7 @@ li > p:last-of-type:only-child {
 </li>
                   <li class="compact" id="section-5.2-2.5.2.5.2.2">Cardinality: 1<a href="#section-5.2-2.5.2.5.2.2" class="pilcrow">¶</a>
 </li>
-                  <li class="compact" id="section-5.2-2.5.2.5.2.3">Mutability: create-only<a href="#section-5.2-2.5.2.5.2.3" class="pilcrow">¶</a>
+                  <li class="compact" id="section-5.2-2.5.2.5.2.3">Mutability: read-only<a href="#section-5.2-2.5.2.5.2.3" class="pilcrow">¶</a>
 </li>
                   <li class="compact" id="section-5.2-2.5.2.5.2.4">Data Type: identifier<a href="#section-5.2-2.5.2.5.2.4" class="pilcrow">¶</a>
 </li>
@@ -2163,7 +2206,7 @@ li > p:last-of-type:only-child {
 </li>
                   <li class="compact" id="section-5.2-2.5.2.6.2.2">Cardinality: 1<a href="#section-5.2-2.5.2.6.2.2" class="pilcrow">¶</a>
 </li>
-                  <li class="compact" id="section-5.2-2.5.2.6.2.3">Mutability: create-only<a href="#section-5.2-2.5.2.6.2.3" class="pilcrow">¶</a>
+                  <li class="compact" id="section-5.2-2.5.2.6.2.3">Mutability: read-only<a href="#section-5.2-2.5.2.6.2.3" class="pilcrow">¶</a>
 </li>
                   <li class="compact" id="section-5.2-2.5.2.6.2.4">Data Type: string<a href="#section-5.2-2.5.2.6.2.4" class="pilcrow">¶</a>
 </li>
@@ -2235,6 +2278,23 @@ li > p:last-of-type:only-child {
                   <li class="compact" id="section-5.2-2.5.2.9.2.5">Description: The usage type for the authorisation request.<a href="#section-5.2-2.5.2.9.2.5" class="pilcrow">¶</a>
 </li>
                   <li class="compact" id="section-5.2-2.5.2.9.2.6">Constraints: MUST be one of <code>"single-use"</code> or <code>"multi-use"</code>, the default being <code>"single-use"</code>.<a href="#section-5.2-2.5.2.9.2.6" class="pilcrow">¶</a>
+</li>
+                </ul>
+</li>
+              <li class="compact" id="section-5.2-2.5.2.10">
+                <p id="section-5.2-2.5.2.10.1">Status<a href="#section-5.2-2.5.2.10.1" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-5.2-2.5.2.10.2.1">Identifier: status<a href="#section-5.2-2.5.2.10.2.1" class="pilcrow">¶</a>
+</li>
+                  <li class="compact" id="section-5.2-2.5.2.10.2.2">Cardinality: 1<a href="#section-5.2-2.5.2.10.2.2" class="pilcrow">¶</a>
+</li>
+                  <li class="compact" id="section-5.2-2.5.2.10.2.3">Mutability: read-only<a href="#section-5.2-2.5.2.10.2.3" class="pilcrow">¶</a>
+</li>
+                  <li class="compact" id="section-5.2-2.5.2.10.2.4">Data Type: Status Object<a href="#section-5.2-2.5.2.10.2.4" class="pilcrow">¶</a>
+</li>
+                  <li class="compact" id="section-5.2-2.5.2.10.2.5">Description: The current lifecycle status of the authorisation, as described in <a href="#fig-authorisation-lifecycle" class="auto internal xref">Figure 2</a>.<a href="#section-5.2-2.5.2.10.2.5" class="pilcrow">¶</a>
+</li>
+                  <li class="compact" id="section-5.2-2.5.2.10.2.6">Constraints: MUST be one of the values defined for the Status Object. The value is set by the registry and cannot be specified by the client.<a href="#section-5.2-2.5.2.10.2.6" class="pilcrow">¶</a>
 </li>
                 </ul>
 </li>
@@ -2391,6 +2451,13 @@ li > p:last-of-type:only-child {
                 <td class="text-left" rowspan="1" colspan="1">Registrar</td>
                 <td class="text-left" rowspan="1" colspan="1">Registry, 3rd party</td>
               </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>status</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Registry</td>
+                <td class="text-left" rowspan="1" colspan="1">3rd party, Registrar</td>
+              </tr>
             </tbody>
           </table>
 </div>
@@ -2401,7 +2468,7 @@ li > p:last-of-type:only-child {
           <h4 id="name-json-schema-2">
 <a href="#section-5.2.3" class="section-number selfRef">5.2.3. </a><a href="#name-json-schema-2" class="section-name selfRef">JSON Schema</a>
           </h4>
-<p id="section-5.2.3-1">This section provides normative JSON Schema definitions for the transaction types defined in this document. All schemas use JSON Schema draft 2020-12 <span>[<a href="#JSON-SCHEMA" class="cite xref">JSON-SCHEMA</a>]</span>. The schema below represents the Authorisation Data Object defined in <span>[<a href="#I-D.ietf-rpp-data-objects" class="cite xref">I-D.ietf-rpp-data-objects</a>]</span>, and references the Signature and Approval component object schemas defined in <a href="#component-data-objects-json-schema" class="auto internal xref">Section 5.1.4</a>.<a href="#section-5.2.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.2.3-1">This section provides normative JSON Schema definitions for the transaction types defined in this document. All schemas use JSON Schema draft 2020-12 <span>[<a href="#JSON-SCHEMA" class="cite xref">JSON-SCHEMA</a>]</span>. The schema below represents the Authorisation Data Object defined in <span>[<a href="#I-D.ietf-rpp-data-objects" class="cite xref">I-D.ietf-rpp-data-objects</a>]</span>, and references the Signature and Approval component object schemas defined in <a href="#component-data-objects-json-schema" class="auto internal xref">Section 5.1.5</a>.<a href="#section-5.2.3-1" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-5.2.3-2">
 <pre>{
   "$ref": "#/$defs/authorisation.create",
@@ -2425,9 +2492,10 @@ li > p:last-of-type:only-child {
           "items": { "$ref": "#/$defs/signature" },
           "minItems": 0
         },
-        "approval": { "$ref": "#/$defs/approval" }
+        "approval": { "$ref": "#/$defs/approval" },
+        "status": { "$ref": "#/$defs/status" }
       },
-      "required": ["@type", "transactionType", "timestamp", "expiration", "objectId", "requestorId"]
+      "required": ["@type", "transactionType", "timestamp", "expiration", "objectId", "requestorId", "status"]
     }
   }
 }
@@ -2581,7 +2649,7 @@ TODO: define an IANA registry for user roles?<a href="#section-5.3.3-2.1" class=
           <h4 id="name-json-schema-3">
 <a href="#section-5.3.4" class="section-number selfRef">5.3.4. </a><a href="#name-json-schema-3" class="section-name selfRef">JSON Schema</a>
           </h4>
-<p id="section-5.3.4-1">Following the Additive Schema Composition method defined in <span>[<a href="#I-D.wullink-rpp-extension-guidelines" class="cite xref">I-D.wullink-rpp-extension-guidelines</a>]</span>, this specification does not redefine the JSON Schema of the Organisation Data Object published in <span>[<a href="#I-D.ietf-rpp-json" class="cite xref">I-D.ietf-rpp-json</a>]</span>. Instead, it assigns its own <code>$id</code> to a schema document that composes the base Organisation object with an <code>allOf</code> branch adding the <code>publicKeys</code>, <code>approvalRedirectUri</code>, and <code>approvalReturnUri</code> data elements. The <code>publicKeys</code> dictionary reuses the <code>publicKey</code> component object schema defined in <a href="#component-data-objects-json-schema" class="auto internal xref">Section 5.1.4</a>.<a href="#section-5.3.4-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.4-1">Following the Additive Schema Composition method defined in <span>[<a href="#I-D.wullink-rpp-extension-guidelines" class="cite xref">I-D.wullink-rpp-extension-guidelines</a>]</span>, this specification does not redefine the JSON Schema of the Organisation Data Object published in <span>[<a href="#I-D.ietf-rpp-json" class="cite xref">I-D.ietf-rpp-json</a>]</span>. Instead, it assigns its own <code>$id</code> to a schema document that composes the base Organisation object with an <code>allOf</code> branch adding the <code>publicKeys</code>, <code>approvalRedirectUri</code>, and <code>approvalReturnUri</code> data elements. The <code>publicKeys</code> dictionary reuses the <code>publicKey</code> component object schema defined in <a href="#component-data-objects-json-schema" class="auto internal xref">Section 5.1.5</a>.<a href="#section-5.3.4-1" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-5.3.4-2">
 <pre>{
   "$defs": {
@@ -2823,7 +2891,17 @@ TODO: define an IANA registry for user roles?<a href="#section-5.3.3-2.1" class=
 <span id="name-authorisation-data-object-l"></span><div id="fig-authorisation-lifecycle">
 <figure id="figure-2">
         <div class="lang-ascii sourcecode" id="section-8-2.1">
-<pre>                     +-----------------------+
+<pre>                                 |
+                                 | 3rd party requests authorisation
+                                 v
+                     +-----------------------+
+                     |  active Authorisation  |  yes  +------------------+
+                     |  already exists?       |------&gt;| Request Rejected |
+                     +-----------+-----------+        +------------------+
+                                 |
+                                 | no
+                                 v
+                     +-----------------------+
                      |        Pending        |
                      +-----------+-----------+
                                  |
@@ -2858,15 +2936,16 @@ TODO: define an IANA registry for user roles?<a href="#section-5.3.3-2.1" class=
 <a href="#name-authorisation-data-object-l" class="selfRef">Authorisation Data Object lifecycle</a>
         </figcaption></figure>
 </div>
-<p id="section-8-3">The <code>Invalid</code> state shown above is also reached directly from the <code>Pending</code> or <code>Approved</code> state, without an RPP operation being executed, whenever: the <code>expiration</code> time is reached; the 3rd party rescinds its approval; or the registrar rescinds its approval, as described below.<a href="#section-8-3" class="pilcrow">¶</a></p>
-<p id="section-8-4">The <code>expiration</code> property of the Authorisation Data Object indicates the time the approved request expires. The registry MUST reject any request that has expired, and return an appropriate error response to the 3rd party. The 3rd party MUST ensure that the request is submitted to the registry before it expires.<a href="#section-8-4" class="pilcrow">¶</a></p>
-<p id="section-8-5">The registry MAY set a maximum expiration time for requests, and reject any request that exceeds this limit. The registrar MAY also set a maximum expiration time for requests, and reject any request that exceeds this limit.<a href="#section-8-5" class="pilcrow">¶</a></p>
-<p id="section-8-6">The <code>usage</code> property of the Authorisation Data Object indicates whether the request is a single-use or multi-use request. The registry MUST keep track of the usage of the request, and reject any request that has already been used if it is a single-use request.<a href="#section-8-6" class="pilcrow">¶</a></p>
-<p id="section-8-7">The 3rd party may rescind an approval it has previously granted, at any point while the authorisation remains valid, to immediately terminate its ongoing access to the object. The registry MUST check if the authorisation is linked to the 3rd party, and if so, it MUST invalidate the Authorisation Data Object and reject any subsequent RPP operation request that relies on it.<a href="#section-8-7" class="pilcrow">¶</a></p>
-<p id="section-8-8">The registrar MAY rescind an approval it has previously granted, at any point while the authorisation remains valid, to immediately terminate the 3rd party's ongoing access to the object. This is particularly relevant for <code>"multi-use"</code> requests, which by design grant the 3rd party continuing access to perform the authorised operation on the object until the request expires or is rescinded.<a href="#section-8-8" class="pilcrow">¶</a></p>
-<p id="section-8-9">To rescind an approval, the registrar sends a revocation request to the registry, identifying the Authorisation Data Object by its <code>id</code> and signed by the registrar using the same key used to approve the original request. Upon receiving a valid, signed revocation request, the registry MUST immediately invalidate the referenced Authorisation Data Object, regardless of its <code>expiration</code> or remaining uses, and MUST reject any subsequent RPP operation request that relies on it.<a href="#section-8-9" class="pilcrow">¶</a></p>
-<p id="section-8-10">The registrar MAY rescind an approval, for any object under its management, for any reason, including but not limited to: the registrant revoking consent, a change in the registrant's circumstances, or a violation of the registrar's policies by the 3rd party. The registry MAY also rescind an approval if it determines that the 3rd party is no longer accredited or if it detects suspicious or malicious activity.<a href="#section-8-10" class="pilcrow">¶</a></p>
-<p id="section-8-11">The registry MUST inform the 3rd party that the authorisation has been rescinded, so that the 3rd party can stop relying on it and, where applicable, notify its own client.<a href="#section-8-11" class="pilcrow">¶</a></p>
+<p id="section-8-3">A data object SHOULD have no more than one active Authorisation Data Object for a given <code>transactionType</code> and <code>objectId</code>, as shown by the <code>Request Rejected</code> outcome in <a href="#fig-authorisation-lifecycle" class="auto internal xref">Figure 2</a>. The registry MUST reject any request that would create a new Authorisation Data Object for the same <code>transactionType</code> and <code>objectId</code> if an existing Authorisation Data Object is still in the <code>Pending</code> or <code>Approved</code> state.<a href="#section-8-3" class="pilcrow">¶</a></p>
+<p id="section-8-4">The <code>Invalid</code> state shown above is also reached directly from the <code>Pending</code> or <code>Approved</code> state, without an RPP operation being executed, whenever: the <code>expiration</code> time is reached; the 3rd party rescinds its approval; or the registrar rescinds its approval, as described below.<a href="#section-8-4" class="pilcrow">¶</a></p>
+<p id="section-8-5">The <code>expiration</code> property of the Authorisation Data Object indicates the time the approved request expires. The registry MUST reject any request that has expired, and return an appropriate error response to the 3rd party. The 3rd party MUST ensure that the request is submitted to the registry before it expires.<a href="#section-8-5" class="pilcrow">¶</a></p>
+<p id="section-8-6">The registry MAY set a maximum expiration time for requests, and reject any request that exceeds this limit. The registrar MAY also set a maximum expiration time for requests, and reject any request that exceeds this limit.<a href="#section-8-6" class="pilcrow">¶</a></p>
+<p id="section-8-7">The <code>usage</code> property of the Authorisation Data Object indicates whether the request is a single-use or multi-use request. The registry MUST keep track of the usage of the request, and reject any request that has already been used if it is a single-use request.<a href="#section-8-7" class="pilcrow">¶</a></p>
+<p id="section-8-8">The 3rd party may rescind an approval it has previously granted, at any point while the authorisation remains valid, to immediately terminate its ongoing access to the object. The registry MUST check if the authorisation is linked to the 3rd party, and if so, it MUST invalidate the Authorisation Data Object and reject any subsequent RPP operation request that relies on it.<a href="#section-8-8" class="pilcrow">¶</a></p>
+<p id="section-8-9">The registrar MAY rescind an approval it has previously granted, at any point while the authorisation remains valid, to immediately terminate the 3rd party's ongoing access to the object. This is particularly relevant for <code>"multi-use"</code> requests, which by design grant the 3rd party continuing access to perform the authorised operation on the object until the request expires or is rescinded.<a href="#section-8-9" class="pilcrow">¶</a></p>
+<p id="section-8-10">To rescind an approval, the registrar sends a revocation request to the registry, identifying the Authorisation Data Object by its <code>id</code> and signed by the registrar using the same key used to approve the original request. Upon receiving a valid, signed revocation request, the registry MUST immediately invalidate the referenced Authorisation Data Object, regardless of its <code>expiration</code> or remaining uses, and MUST reject any subsequent RPP operation request that relies on it.<a href="#section-8-10" class="pilcrow">¶</a></p>
+<p id="section-8-11">The registrar MAY rescind an approval, for any object under its management, for any reason, including but not limited to: the registrant revoking consent, a change in the registrant's circumstances, or a violation of the registrar's policies by the 3rd party. The registry MAY also rescind an approval if it determines that the 3rd party is no longer accredited or if it detects suspicious or malicious activity.<a href="#section-8-11" class="pilcrow">¶</a></p>
+<p id="section-8-12">The registry MUST inform the 3rd party that the authorisation has been rescinded, so that the 3rd party can stop relying on it and, where applicable, notify its own client.<a href="#section-8-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="request-signing-and-verification">
