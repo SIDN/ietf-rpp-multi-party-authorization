@@ -24,8 +24,7 @@
 <middle>
 
 <section anchor="introduction"><name>Introduction</name>
-<t>The generic multi-party authorization flow described in this document allows registries to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrar and registrant's explicit consent is obtained before any RPP operations, described in <xref target="I-D.ietf-rpp-core"></xref>, are executed. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The 3rd party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties. How to secure the HTTP endpoints used in the multi-party authorization flow is out of scope for this document, but it is RECOMMENDED that OAuth 2.0 for RPP, as described in <xref target="I-D.wullink-rpp-oauth2"></xref>, be used.</t>
-<t><strong>TODO</strong> what about registries that allow direct registr access, without a registrar?</t>
+<t>The multi-party authorization process described in this document allows a registry to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrar and registrant's explicit consent is obtained before any RPP operations, described in <xref target="I-D.ietf-rpp-core"></xref>, are executed. A third-party service provider MAY be used by a registrant for domain management functions, such as DNS hosting. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The third-party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties.</t>
 </section>
 
 <section anchor="terminology"><name>Terminology</name>
@@ -46,7 +45,7 @@
 </section>
 
 <section anchor="architectural-overview"><name>Architectural Overview</name>
-<t>RPP enables registries to securely delegate domain management functions to accredited third-party service providers, such as DNS hosting providers.</t>
+<t>RPP enables registries to securely delegate domain management functions to accredited third-party service providers, such as DNS hosting providers. The process of delegating domain management functions to a third-party service provider requires the explicit consent of the registrant, and the registrar managing the object resource. The multi-party authorization flow described in this document ensures that the registrant's consent is obtained before any RPP operations are executed.</t>
 
 <section anchor="authorization-request"><name>Authorization Request</name>
 <t>The authorization of such a delegated operation requires the explicit participation of four parties: the registrant, the third party performing the operation, the registry, and the registrar managing the object resource. The registry and the registrar each apply their own digital signature to the authorization request, the operation MUST only be executed once both signatures have been verified.</t>
@@ -103,6 +102,12 @@
      |  granted      |               |               |
      |<--------------|               |               |
      |               |               |               |
+     |               | 13. Send      |               |
+     |               |  request      |               |
+     |               +-------------->|               |
+     |               |               |               |
+     |               |               | 14. execute   |
+     |               |               |  operation    |
 ]]>
 </sourcecode>
 </figure>
@@ -121,58 +126,384 @@
 <li>The third party submits the authorization request to the registry, including the signatures of both the registry and the registrar.</li>
 <li>The registry verifies the signatures of the registry itself and the registrar. The registry creates an Authorisation Data Object, which is stored in the registry's database and used to authorize future operations.</li>
 <li>The third party informs the client that the requested authorisation has been granted.</li>
+<li>The third party executes the approved operation on behalf of the registrant.</li>
+<li>The registry executes the requested operation, using the Authorisation Data Object to verify that the request has been approved by both the registry and the registrar.</li>
 </ol>
-</section>
-
-<section anchor="authorization-usage"><name>Authorization Usage</name>
-<t>After the multi-party authorization flow is completed, the registry MUST use the Authorisation Data Object to authorize an operation request by a 3rd party. If the object in the request of a 3rd party is linked to a valid Authorisation Data Object, the registry MUST execute the requested operation and return the result to the 3rd party. If there is no Authorisation Data Object or it is invalid, the registry MUST reject the request and return an appropriate error response to the 3rd party.</t>
-<t><strong>TODO</strong> add diagragm showing how the Authorisation Data Object is used to authorize an operation request by a 3rd party.</t>
-</section>
-
-<section anchor="authorization-management"><name>Authorization Management</name>
-<t>An authorization granted by the registry MAY be terminated by the 3rd party, the registrar or the registry at any time, before the expiration of the Authorisation Data Object.</t>
-<t><strong>TODO</strong> add diagragm showing how the Authorisation Data Object is revoked by the registrar or registry or rescinded by the 3rd party.</t>
 </section>
 </section>
 
 <section anchor="data-objects"><name>Data Objects</name>
-<t><strong>TODO</strong> here or in data objects doc? (now in data objects doc)</t>
 
 <section anchor="component-data-objects"><name>Component Data Objects</name>
 
 <section anchor="public-key-data-object"><name>Public Key Data Object</name>
-<t><strong>TODO</strong></t>
+
+<ul spacing="compact">
+<li>Name: Public Key Object</li>
+<li>Identifier: publicKey</li>
+<li>Description: Represents a public key associated with an Organisation Object. The public key is used to verify the authenticity of messages signed by the corresponding private key.</li>
+<li><t>Data Elements:</t>
+
+<ul spacing="compact">
+<li><t>Key Type</t>
+
+<ul spacing="compact">
+<li>Identifier: type</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: String</li>
+<li>Description: The type of the public key (&quot;RSA&quot; or &quot;EC&quot;) from the &quot;JSON Web Key Types&quot; registry maintained by IANA <xref target="IANA.JOSE"></xref></li>
+<li>Constraints: The value MUST be one of &quot;RSA&quot; or &quot;EC&quot;. The type cannot be updated due to ongoing transactions and the need to maintain a stable reference to the key. If a new key type is needed, a new Public Key Object MUST be created with a different id and type.</li>
+</ul></li>
+<li><t>Algorithm</t>
+
+<ul spacing="compact">
+<li>Identifier: alg</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: String</li>
+<li>Description: The algorithm used with the public key, from the &quot;JSON Web Signature and Encryption Algorithms&quot; registry maintained by IANA <xref target="IANA.JOSE"></xref></li>
+<li>Constraints: The value MUST be one of the values registered in the IANA registry for the allowed public key types. The algorithm cannot be updated due to ongoing transactions and the need to maintain a stable reference to the key.</li>
+</ul></li>
+<li><t>RSAModulus</t>
+
+<ul spacing="compact">
+<li>Identifier: n</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: String</li>
+<li>Description: The RSA modulus value, base64-encoded</li>
+<li>Constraints: This element MUST be present if the key type is &quot;RSA&quot;. The modulus cannot be updated due to ongoing transactions and the need to maintain a stable reference to the key.</li>
+</ul></li>
+<li><t>RSAExponent</t>
+
+<ul spacing="compact">
+<li>Identifier: e</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: String</li>
+<li>Description: The RSA exponent value, base64-encoded</li>
+<li>Constraints: This element MUST be present if the key type is &quot;RSA&quot;. The exponent cannot be updated due to ongoing transactions and the need to maintain a stable reference to the key.</li>
+</ul></li>
+<li><t>ECXCoordinate</t>
+
+<ul spacing="compact">
+<li>Identifier: x</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: String</li>
+<li>Description: The EC X coordinate value, base64-encoded</li>
+<li>Constraints: This element MUST be present if the key type is &quot;EC&quot;. The X coordinate cannot be updated due to ongoing transactions and the need to maintain a stable reference to the key.</li>
+</ul></li>
+<li><t>ECYCoordinate</t>
+
+<ul spacing="compact">
+<li>Identifier: y</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: String</li>
+<li>Description: The EC Y coordinate value, base64-encoded</li>
+<li>Constraints: This element MUST be present if the key type is &quot;EC&quot;. The Y coordinate cannot be updated due to ongoing transactions and the need to maintain a stable reference to the key.</li>
+</ul></li>
+<li><t>ECurve</t>
+
+<ul spacing="compact">
+<li>Identifier: crv</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: String</li>
+<li>Description: The EC curve name, from the &quot;JSON Web Key Elliptic Curve&quot; registry maintained by IANA <xref target="IANA.JOSE"></xref></li>
+<li>Constraints: This element MUST be present if the key type is &quot;EC&quot;. The curve cannot be updated due to ongoing transactions and the need to maintain a stable reference to the key.</li>
+</ul></li>
+</ul></li>
+</ul>
 </section>
 
-<section anchor="signature-data-object"><name>Signature Data Object</name>
-<t><strong>TODO</strong></t>
+<section anchor="signature-object"><name>Signature Object</name>
+
+<ul spacing="compact">
+<li>Name: Signature Object</li>
+<li>Identifier: signature</li>
+<li>Description: Represents a digital signature, the signature is used to verify the authenticity of messages signed by the corresponding private key.</li>
+<li><t>Data Elements:</t>
+
+<ul spacing="compact">
+<li><t>Key ID</t>
+
+<ul spacing="compact">
+<li>Identifier: keyId</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: String</li>
+<li>Description: The identifier of the public key corresponding to the private key used to create the signature.</li>
+<li>Constraints: The value MUST match the identifier of a Public Key Object known to the verifying party.</li>
+</ul></li>
+<li><t>Signed At</t>
+
+<ul spacing="compact">
+<li>Identifier: signedAt</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: Date-Time</li>
+<li>Description: The date and time at which the signature was applied.</li>
+<li>Constraints: (none)</li>
+</ul></li>
+<li><t>Signature</t>
+
+<ul spacing="compact">
+<li>Identifier: signature</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: String</li>
+<li>Description: The base64-encoded digital signature value.</li>
+<li>Constraints: (none)</li>
+</ul></li>
+</ul></li>
+</ul>
 </section>
 
-<section anchor="approval-data-object"><name>Approval Data Object</name>
-<t><strong>TODO</strong></t>
+<section anchor="approval-object"><name>Approval Object</name>
+
+<ul spacing="compact">
+<li>Name: Approval Object</li>
+<li>Identifier: approval</li>
+<li>Description: Represents an approval for a requested operation, the approval is used to verify the consent of the approving party.</li>
+<li><t>Data Elements:</t>
+
+<ul spacing="compact">
+<li><t>Approved</t>
+
+<ul spacing="compact">
+<li>Identifier: approved</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: Boolean</li>
+<li>Description: Indicates whether the requested operation was approved.</li>
+<li>Constraints: (none)</li>
+</ul></li>
+<li><t>Approved By</t>
+
+<ul spacing="compact">
+<li>Identifier: approvedBy</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: String</li>
+<li>Description: An identifier of the individual or role that made the approval decision.</li>
+<li>Constraints: (none)</li>
+</ul></li>
+<li><t>Reason</t>
+
+<ul spacing="compact">
+<li>Identifier: reason</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: String</li>
+<li>Description: An explanation for the approval decision, in particular the reason for a rejection.</li>
+<li>Constraints: (none)</li>
+</ul></li>
+<li><t>Timestamp</t>
+
+<ul spacing="compact">
+<li>Identifier: timestamp</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: Date-Time</li>
+<li>Description: The date and time at which the approval decision was made.</li>
+<li>Constraints: (none)</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+
+<section anchor="component-data-objects-json-schema"><name>JSON Schema</name>
+<t>This section provides normative JSON Schema definitions for the Public Key, Signature, and Approval component objects described above. All schemas use JSON Schema draft 2020-12 <xref target="JSON-SCHEMA"></xref>. Per Rule 20 of <xref target="I-D.ietf-rpp-json"></xref>, these <tt>$defs</tt> entries share the <tt>$id</tt> of the schema document defined by this specification, so they are part of the same JSON Schema document as the Authorisation Data Object schema in <xref target="authorisation-data-object-json-schema"></xref> and the Organisation Data Object extension schema in the Organization Data Object section, and can be referenced from both via <tt>$ref</tt>.</t>
+
+<sourcecode type="json"><![CDATA[{
+  "$defs": {
+    "publicKey": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["RSA", "EC"] },
+        "alg":  { "type": "string" },
+        "n":    { "type": "string" },
+        "e":    { "type": "string" },
+        "x":    { "type": "string" },
+        "y":    { "type": "string" },
+        "crv":  { "type": "string" }
+      },
+      "required": ["type", "alg"]
+    },
+    "signature": {
+      "type": "object",
+      "properties": {
+        "keyId":     { "type": "string" },
+        "signedAt":  { "type": "string", "format": "date-time" },
+        "signature": { "type": "string" }
+      },
+      "required": ["keyId", "signedAt", "signature"]
+    },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "approved":   { "type": "boolean" },
+        "approvedBy": { "type": "string" },
+        "reason":     { "type": "string" },
+        "timestamp":  { "type": "string", "format": "date-time" }
+      },
+      "required": ["approved", "approvedBy", "timestamp"]
+    }
+  }
+}
+]]>
+</sourcecode>
+<t>Consistent with Rule 24 of <xref target="I-D.ietf-rpp-json"></xref>, none of these component object definitions use <tt>&quot;additionalProperties&quot;: false</tt> or <tt>&quot;unevaluatedProperties&quot;: false</tt>, so that extensions MAY add further properties to any of them, following the Additive Schema Composition method defined in <xref target="I-D.wullink-rpp-extension-guidelines"></xref>.</t>
 </section>
 </section>
 
 <section anchor="authorisation-data-object"><name>Authorisation Data Object</name>
-
-<section anchor="authorisation-elements"><name>Elements</name>
-<t>This section describes the data elements of the Authorisation Data Object, as defined in <xref target="I-D.ietf-rpp-data-objects"></xref>.</t>
+<t>This specification defines a new Authorisation Process Object...</t>
 
 <ul spacing="compact">
-<li><tt>transactionType</tt>: The type of transaction for the authorisation request. MUST be one of the values registered in the &quot;RPP Multi-Party Transaction Types&quot; registry <xref target="tbl-rpp-transaction-types"></xref>. Every transaction type is associated with a specific RPP operation, and the <tt>data</tt> property of the authorisation request MUST contain the RPP request body for that operation.</li>
-<li><tt>id</tt>: The identifier for the authorisation request.</li>
-<li><tt>timestamp</tt>: The time the authorisation request was created.</li>
-<li><tt>expiration</tt>: The time the authorisation request expires. MUST be later than <tt>timestamp</tt>.</li>
-<li><tt>objectId</tt>: The identifier of the object the authorisation request pertains to.</li>
-<li><tt>requestorId</tt>: The unique organisation identifier of the requestor.</li>
-<li><tt>requestorName</tt>: The name of the requestor.</li>
-<li><tt>approvalUrl</tt>: The URI to which the client should be redirected for multi-party approval. MUST only be used when the referenced organisation is a registrar or reseller supporting multi-party approval.</li>
-<li><tt>returnUrl</tt>: The URI to which the client should be redirected after multi-party approval at the registrar. MUST only be used when the referenced organisation is a 3rd party supporting multi-party approval.</li>
-<li><tt>usage</tt>: The usage type for the authorisation request. MUST be one of <tt>&quot;single-use&quot;</tt> or <tt>&quot;multi-use&quot;</tt>, the default being <tt>&quot;single-use&quot;</tt>.</li>
-<li><tt>data</tt>: The data associated with the authorisation request, containing the RPP request body for the operation identified by <tt>transactionType</tt>; MUST be a valid RPP Data Object, see <xref target="transaction-types"></xref>.</li>
-<li><tt>signatures</tt>: The digital signatures applied to the authorisation request, used to verify its authenticity and integrity, see <xref target="request-signing-and-verification"></xref>.</li>
-<li><tt>approval</tt>: The approval information for the authorisation request.</li>
+<li>Name: Authorisation Process Object</li>
+<li>Identifier: authorisation</li>
+<li>Unique Identifier: id</li>
+<li>Description: An Authorisation Process Object represents the authorisation information for 3rd party access to a specific RPP operation on an object resource.</li>
+<li><t>Data Elements:</t>
+
+<ul spacing="compact">
+<li><t>Transaction Type</t>
+
+<ul spacing="compact">
+<li>Identifier: transactionType</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: string</li>
+<li>Description: The type of transaction for the authorisation request. MUST be one of the values registered in the &quot;RPP Multi-Party Transaction Types&quot; registry <xref target="tbl-rpp-transaction-types"></xref>. Every transaction type is associated with a specific RPP operation.</li>
+<li>Constraints: MUST be one of the predefined transaction types defined in the IANA registry for RPP multi-party approval transaction types.</li>
+</ul></li>
+<li><t>Timestamp</t>
+
+<ul spacing="compact">
+<li>Identifier: timestamp</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: Timestamp</li>
+<li>Description: The time the authorisation was created</li>
+<li>Constraints: (none)</li>
+</ul></li>
+<li><t>Expiry Time</t>
+
+<ul spacing="compact">
+<li>Identifier: expiration</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: Timestamp</li>
+<li>Description: The time the authorisation expires</li>
+<li>Constraints: MUST be later than the timestamp of the authorisation request.</li>
+</ul></li>
+<li><t>Object Identifier</t>
+
+<ul spacing="compact">
+<li>Identifier: objectId</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: identifier</li>
+<li>Description: The identifier of the object the authorisation is associated with</li>
+<li>Constraints: (none)</li>
+</ul></li>
+<li><t>Requestor Id</t>
+
+<ul spacing="compact">
+<li>Identifier: requestorId</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: identifier</li>
+<li>Description: The unique organisation identifier of the organisation that created the authorisation request</li>
+<li>Constraints: (none)</li>
+</ul></li>
+<li><t>Requestor Name</t>
+
+<ul spacing="compact">
+<li>Identifier: requestorName</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: string</li>
+<li>Description: The name of the organisation that created the authorisation request</li>
+<li>Constraints: (none)</li>
+</ul></li>
+<li><t>Approval URL</t>
+
+<ul spacing="compact">
+<li>Identifier: approvalUrl</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: read-write</li>
+<li>Data Type: URI</li>
+<li>Description: The URI to which the client should be redirected for approval.</li>
+<li><t>Constraints:</t>
+
+<ul spacing="compact">
+<li>The value MUST be a valid URI.</li>
+<li>This data element MUST only be used when the organisation represents a registrar or reseller supporting multi-party approval.</li>
+</ul></li>
+</ul></li>
+<li><t>Return URL</t>
+
+<ul spacing="compact">
+<li>Identifier: returnUrl</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: read-write</li>
+<li>Data Type: URI</li>
+<li>Description: The URI to which the client should be redirected after approval at the registrar is complete.</li>
+<li><t>Constraints:</t>
+
+<ul spacing="compact">
+<li>The value MUST be a valid URI.</li>
+<li>This data element MUST only be used when the organisation represents a 3rd party supporting multi-party approval.</li>
+</ul></li>
+</ul></li>
+<li><t>Usage</t>
+
+<ul spacing="compact">
+<li>Identifier: usage</li>
+<li>Cardinality: 1</li>
+<li>Mutability: create-only</li>
+<li>Data Type: string</li>
+<li>Description: The usage type for the authorisation request.</li>
+<li>Constraints: MUST be one of <tt>&quot;single-use&quot;</tt> or <tt>&quot;multi-use&quot;</tt>, the default being <tt>&quot;single-use&quot;</tt>.</li>
+</ul></li>
+</ul></li>
 </ul>
+<t><strong>TODO</strong> use reference to organisation object for requestorId and requestorName, or keep them as separate fields?</t>
+
+<section anchor="operations"><name>Operations</name>
+
+<section anchor="create-request"><name>Create (Request)</name>
+
+<ul spacing="compact">
+<li>Identifier: create</li>
+</ul>
+<t>The Create operation allows a client to provision a new Authorisation Process Object resource. The operation accepts as input all create-only and read-write data elements defined for the Authorisation Data Object.</t>
+
+<ul spacing="compact">
+<li><t>Authorisation:</t>
+
+<ul spacing="compact">
+<li>The 3rd party MUST have the necessary authorization to initiate the creation of the Authorisation Process Object for the request transaction type.</li>
+</ul></li>
+</ul>
+</section>
+
+<section anchor="read"><name>Read</name>
+<t><strong>TODO</strong></t>
+</section>
+
+<section anchor="update-decision"><name>Update (Decision)</name>
+<t><strong>TODO</strong></t>
+</section>
+
+<section anchor="delete-revoke"><name>Delete (Revoke)</name>
+<t><strong>TODO</strong></t>
+</section>
 </section>
 
 <section anchor="authorisation-party-usage"><name>Usage of elements by parties</name>
@@ -191,12 +522,6 @@
 <td><tt>transactionType</tt></td>
 <td>3rd party</td>
 <td>Registry, Registrar</td>
-</tr>
-
-<tr>
-<td><tt>id</tt></td>
-<td>Registry</td>
-<td>3rd party, Registrar</td>
 </tr>
 
 <tr>
@@ -248,12 +573,6 @@
 </tr>
 
 <tr>
-<td><tt>data</tt></td>
-<td>3rd party</td>
-<td>Registry, Registrar</td>
-</tr>
-
-<tr>
 <td><tt>signatures</tt></td>
 <td>Registry, Registrar</td>
 <td>Registry, Registrar</td>
@@ -267,11 +586,10 @@
 </tbody>
 </table></section>
 
-<section anchor="json-schema"><name>JSON Schema</name>
-<t>This section provides normative JSON Schema definitions for the transaction types defined in this document. All schemas use JSON Schema draft 2020-12 <xref target="JSON-SCHEMA"></xref>. The schema below represents the Authorisation Data Object defined in <xref target="I-D.ietf-rpp-data-objects"></xref> and described in <xref target="authorisation-elements"></xref>.</t>
+<section anchor="authorisation-data-object-json-schema"><name>JSON Schema</name>
+<t>This section provides normative JSON Schema definitions for the transaction types defined in this document. All schemas use JSON Schema draft 2020-12 <xref target="JSON-SCHEMA"></xref>. The schema below represents the Authorisation Data Object defined in <xref target="I-D.ietf-rpp-data-objects"></xref>, and references the Signature and Approval component object schemas defined in <xref target="component-data-objects-json-schema"></xref>.</t>
 
 <sourcecode type="json"><![CDATA[{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$ref": "#/$defs/authorisation.create",
   "$defs": {
     "authorisation.create": {
@@ -279,7 +597,6 @@
       "properties": {
         "@type": { "type": "string", "const": "authorisation" },
         "transactionType": { "type": "string", "enum": ["rpp:mpa-type:domain:ns-update", "rpp:mpa-type:domain:dnssec-update", "rpp:mpa-type:domain:transfer"] },
-        "id": { "type": "string" },
         "timestamp": { "type": "string", "format": "date-time" },
         "expiration": { "type": "string", "format": "date-time" },
         "objectId": { "type": "string" },
@@ -288,41 +605,15 @@
         "approvalUrl": { "type": "string", "format": "uri" },
         "returnUrl": { "type": "string", "format": "uri" },
         "usage": { "type": "string", "enum": ["single-use", "multi-use"] },
-        "data": {
-          "description": "The RPP JSON request body for the operation identified by transactionType"
-        },
         "signatures": {
           "type": "array",
-          "description": "An ordered list of signatures",
-          "items": {
-            "type": "object",
-            "properties": {
-              "keyId": { "type": "string" },
-              "signedAt": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The date and time at which this signature was applied."
-              },
-              "signature": { "type": "string" }
-            },
-            "required": ["keyId", "signedAt", "signature"],
-            "additionalProperties": false
-          },
+          "description": "An ordered list of Signature Objects",
+          "items": { "$ref": "#/$defs/signature" },
           "minItems": 0
         },
-        "approval": {
-          "type": "object",
-          "properties": {
-            "approved": { "type": "boolean" },
-            "approvedBy": { "type": "string" },
-            "reason": { "type": "string" },
-            "timestamp": { "type": "string", "format": "date-time" }
-          },
-          "required": ["approved", "approvedBy", "timestamp"],
-          "additionalProperties": false
-        }
+        "approval": { "$ref": "#/$defs/approval" }
       },
-      "required": ["@type", "transactionType", "id", "timestamp", "expiration", "objectId", "requestorId"]
+      "required": ["@type", "transactionType", "timestamp", "expiration", "objectId", "requestorId"]
     }
   }
 }
@@ -360,6 +651,190 @@ Location: https://thirdparty.example/rpp-auth/callback?approval-state=abc123
 ]]>
 </sourcecode>
 </section>
+
+<section anchor="data-eelements"><name>Data Eelements</name>
+
+<ul>
+<li><t>Public Keys</t>
+
+<ul spacing="compact">
+<li>Identifier: publicKeys</li>
+<li>Cardinality: 0+</li>
+<li>Mutability: read-write</li>
+<li><t>Data Type: DictionaryComposition[Public Key Object]</t>
+
+<ul spacing="compact">
+<li>Label Description: Public key identifier</li>
+<li>Label Constraints:</li>
+</ul></li>
+<li>Direct Access: true</li>
+<li>Description: One or more public keys associated with the organisation.</li>
+<li><t>Constraints:</t>
+
+<ul spacing="compact">
+<li>Each key value MUST be a non-empty string.</li>
+<li>Allowed key values MAY be constrained by server policy.</li>
+</ul></li>
+</ul></li>
+<li><t>Approval Redirect URI</t>
+
+<ul spacing="compact">
+<li>Identifier: approvalRedirectUri</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: read-write</li>
+<li>Data Type: URI</li>
+<li>Description: The URI to which the client should be redirected for multi-party approval.</li>
+<li><t>Constraints:</t>
+
+<ul spacing="compact">
+<li>The value MUST be a valid URI.</li>
+<li>This data element MUST only be used when the organisation represents a registrar or reseller supporting multi-party approval.</li>
+</ul></li>
+</ul></li>
+<li><t>Approval Return URI</t>
+
+<ul spacing="compact">
+<li>Identifier: approvalReturnUri</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: read-write</li>
+<li>Data Type: URI</li>
+<li>Description: The URI to which the client should be redirected after multi-party approval at the registrar.</li>
+<li><t>Constraints:</t>
+
+<ul spacing="compact">
+<li>The value MUST be a valid URI.</li>
+<li>This data element MUST only be used when the organisation represents a 3rd party supporting multi-party approval.</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<aside><t>TODO: define the approvalRedirectUri and approvalReturnUri here, or in the multi-party approval spec?
+TODO: define an IANA registry for user roles?</t>
+</aside>
+</section>
+
+<section anchor="json-schema"><name>JSON Schema</name>
+<t>Following the Additive Schema Composition method defined in <xref target="I-D.wullink-rpp-extension-guidelines"></xref>, this specification does not redefine the JSON Schema of the Organisation Data Object published in <xref target="I-D.ietf-rpp-json"></xref>. Instead, it assigns its own <tt>$id</tt> to a schema document that composes the base Organisation object with an <tt>allOf</tt> branch adding the <tt>publicKeys</tt>, <tt>approvalRedirectUri</tt>, and <tt>approvalReturnUri</tt> data elements. The <tt>publicKeys</tt> dictionary reuses the <tt>publicKey</tt> component object schema defined in <xref target="component-data-objects-json-schema"></xref>.</t>
+
+<sourcecode type="json"><![CDATA[{
+  "$defs": {
+    "$id": "urn:ietf:params:rpp:schema:mpa-extension-organisation-create",
+    "organisationObject.MpaExtension": {
+      "allOf": [
+        { "$ref": "#/$defs/organisationObject.create" },
+        {
+          "properties": {
+               "publicKeys": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/publicKey" }
+            },
+            "approvalRedirectUri": { "type": "string", "format": "uri" },
+            "approvalReturnUri":   { "type": "string", "format": "uri" }
+          }
+        }
+      ]
+    }
+  }
+}
+]]>
+</sourcecode>
+</section>
+</section>
+</section>
+
+<section anchor="process-objects"><name>Process Objects</name>
+
+<section anchor="authorisation-process-object"><name>Authorisation Process Object</name>
+<t>This specification defines a new Authorisation Process Object...</t>
+
+<ul spacing="compact">
+<li>Name: Authorisation Process Object</li>
+<li>Identifier: authorisationProcess</li>
+<li>Unique Identifier: processId</li>
+<li>Description: Represents the process initiated when a resource creation operation is performed. It carries creation-specific inputs that are consumed during the creation operation and are not stored as persistent attributes of the created resource object.</li>
+<li><t>Data Elements:</t>
+
+<ul spacing="compact">
+<li><t>Process ID</t>
+
+<ul spacing="compact">
+<li>Identifier: processId</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: read-only</li>
+<li>Data Type: String</li>
+<li>Description: A server-assigned identifier of the process instance, unique within the scope of the Owner Data Object.</li>
+<li>Constraints: The value is set by the server and cannot be specified by the client.</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<section anchor="operations-1"><name>Operations</name>
+
+<section anchor="create-request-1"><name>Create (Request)</name>
+
+<ul>
+<li>Identifier: create</li>
+<li>Input: Authorisation Process Object (create-only and read-write elements)</li>
+<li><t>Output: Authorisation Process Object</t>
+</li>
+<li><t>Authorisation:</t>
+
+<ul spacing="compact">
+<li>Inherited from the resource object create operation that initiates this process.</li>
+</ul></li>
+</ul>
+<t>The following transient data elements are defined for this operation:</t>
+
+<ul spacing="compact">
+<li><t>Signatures</t>
+
+<ul spacing="compact">
+<li>Identifier: signatures</li>
+<li>Cardinality: 0+</li>
+<li>Mutability: read-write</li>
+<li>Data Type: Signature Object</li>
+<li>Description: The digital signatures of the authorisation request, used to verify the authenticity and integrity of the request.</li>
+<li>Constraints: (none)</li>
+</ul></li>
+</ul>
+</section>
+
+<section anchor="read-1"><name>Read</name>
+<t><strong>TODO</strong></t>
+</section>
+
+<section anchor="update-decision-1"><name>Update (Decision)</name>
+<t>The following transient data elements are defined for this operation:</t>
+
+<ul spacing="compact">
+<li><t>Signatures</t>
+
+<ul spacing="compact">
+<li>Identifier: signatures</li>
+<li>Cardinality: 0+</li>
+<li>Mutability: read-write</li>
+<li>Data Type: Signature Object</li>
+<li>Description: The digital signatures of the authorisation request, used to verify the authenticity and integrity of the request.</li>
+<li>Constraints: (none)</li>
+</ul></li>
+<li><t>Approval</t>
+
+<ul spacing="compact">
+<li>Identifier: approval</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: read-write</li>
+<li>Data Type: Approval Object</li>
+<li>Description: The approval status of the authorisation request, used to verify the consent of the approving party.</li>
+<li>Constraints: (none)</li>
+</ul></li>
+</ul>
+<t><strong>TODO</strong></t>
+</section>
+
+<section anchor="delete-revoke-1"><name>Delete (Revoke)</name>
+<t><strong>TODO</strong></t>
+</section>
+</section>
 </section>
 </section>
 
@@ -367,11 +842,20 @@ Location: https://thirdparty.example/rpp-auth/callback?approval-state=abc123
 <t>The request is initiated by the 3rd party, and validated and processed by both the registry and registrar. The request MUST be signed by both the registry and registrar.</t>
 
 <section anchor="third-party"><name>Third Party</name>
-<t>The 3rd party constructs the request, setting the <tt>transactionType</tt>, <tt>objectId</tt>, <tt>expiration</tt> and <tt>data</tt> properties, and sends the request to the registry.</t>
+<t>The 3rd party constructs the request, setting the <tt>transactionType</tt>, <tt>objectId</tt>, and <tt>expiration</tt> properties, and sends the request to the registry.</t>
 </section>
 
 <section anchor="registry"><name>Registry</name>
-<t>The registry, after validation of the request, adds the following properties to the request: <tt>id</tt>, <tt>requestorId</tt>, <tt>requestorName</tt>, <tt>approvalUrl</tt>, <tt>returnUrl</tt>, <tt>timestamp</tt>,<tt>signatures</tt>. The <tt>id</tt> is a unique identifier for the transaction. The <tt>requestorId</tt> is the identifier of the 3rd party that created the request, the <tt>requestorName</tt> is the public name of the requestor to be displayed in the consent screen. The <tt>approvalUrl</tt> is the URL where the request can be approved, the <tt>returnUrl</tt> is the URL to return to after approval, the <tt>timestamp</tt> is the time the request was created, the <tt>expiration</tt> is the time the request expires, the <tt>signatures</tt> contain the cryptographic signatures, the registry MUST add its signature of the request to the <tt>signatures</tt> array, it MUST be the first element in the array.</t>
+<t>The registry MUST validate each request, the following properties MUST be present and valid:</t>
+
+<ul spacing="compact">
+<li>transactionType</li>
+<li>objectId</li>
+<li>expiration</li>
+<li>data</li>
+</ul>
+<t>The registry MUST ensure that only a single Authorisation Data Object is created for a given <tt>transactionType</tt> and <tt>objectId</tt>, and reject any subsequent requests for the same <tt>transactionType</tt> and <tt>objectId</tt> that have not yet expired.</t>
+<t>After validation of the request, creates a response that adds the following properties: <tt>id</tt>, <tt>requestorId</tt>, <tt>requestorName</tt>, <tt>approvalUrl</tt>, <tt>returnUrl</tt>, <tt>timestamp</tt>,<tt>signatures</tt>. The <tt>id</tt> is a unique identifier for the transaction. The <tt>requestorId</tt> is the identifier of the 3rd party that created the request, the <tt>requestorName</tt> is the public name of the requestor to be displayed in the consent screen. The <tt>approvalUrl</tt> is the URL where the request can be approved, the <tt>returnUrl</tt> is the URL to return to after approval, the <tt>timestamp</tt> is the time the request was created, the <tt>expiration</tt> is the time the request expires, the <tt>signatures</tt> contain the cryptographic signatures, the registry MUST add its signature of the request to the <tt>signatures</tt> array, it MUST be the first element in the array.</t>
 </section>
 
 <section anchor="registrar"><name>Registrar</name>
@@ -379,8 +863,42 @@ Location: https://thirdparty.example/rpp-auth/callback?approval-state=abc123
 </section>
 </section>
 
-<section anchor="approval-lifecycle"><name>Approval Lifecycle</name>
-<t>The <tt>expiration</tt> property of the Authorisation Data Object indicates the time the approved request expires. The registry and registrar MUST reject any request that has expired, and return an appropriate error response to the 3rd party. The 3rd party MUST ensure that the request is submitted to the registry before it expires.</t>
+<section anchor="authorisation-lifecycle"><name>Authorisation Lifecycle</name>
+<t>The diagram in <xref target="fig-authorisation-lifecycle"></xref> illustrates the states of an Authorisation Data Object over its lifetime.</t>
+<figure anchor="fig-authorisation-lifecycle"><name>Authorisation Data Object lifecycle </name>
+<sourcecode type="ascii"><![CDATA[                     +-----------------------+
+                     |        Pending        |
+                     +-----------+-----------+
+                                 |
+                                 | registrar approves
+                                 v
+                     +-----------------------+
+              +----->|        Approved       |
+              |      +-----------+-----------+
+              |                  |
+              |                  | RPP operation executed
+              |                  v
+              |         usage == "single-use"?
+              |            yes |      | no
+              |                |      |
+              |                v      +----------------------+
+              |      +-----------------------+               |
+              |      |          Used         |               |
+              |      +-----------+-----------+               |
+              |                  |                           |
+              |                  v                           |
+              |      +-----------------------+               |
+              |      |        Invalid        |               |
+              |      +-----------------------+               |
+              |                                              |
+              +----------------------------------------------+
+                    (multi-use: operation MAY be repeated
+                     while the authorisation remains Approved)
+]]>
+</sourcecode>
+</figure>
+<t>The <tt>Invalid</tt> state shown above is also reached directly from the <tt>Pending</tt> or <tt>Approved</tt> state, without an RPP operation being executed, whenever: the <tt>expiration</tt> time is reached; the 3rd party rescinds its approval; or the registrar rescinds its approval, as described below.</t>
+<t>The <tt>expiration</tt> property of the Authorisation Data Object indicates the time the approved request expires. The registry MUST reject any request that has expired, and return an appropriate error response to the 3rd party. The 3rd party MUST ensure that the request is submitted to the registry before it expires.</t>
 <t>The registry MAY set a maximum expiration time for requests, and reject any request that exceeds this limit. The registrar MAY also set a maximum expiration time for requests, and reject any request that exceeds this limit.</t>
 <t>The <tt>usage</tt> property of the Authorisation Data Object indicates whether the request is a single-use or multi-use request. The registry MUST keep track of the usage of the request, and reject any request that has already been used if it is a single-use request.</t>
 <t>The 3rd party may rescind an approval it has previously granted, at any point while the authorisation remains valid, to immediately terminate its ongoing access to the object. The registry MUST check if the authorisation is linked to the 3rd party, and if so, it MUST invalidate the Authorisation Data Object and reject any subsequent RPP operation request that relies on it.</t>
@@ -473,22 +991,20 @@ Location: https://thirdparty.example/rpp-auth/callback?approval-state=abc123
 <li><tt>rpp:mpa-type:domain:dnssec-update</tt></li>
 <li><tt>rpp:mpa-type:domain:transfer</tt></li>
 </ul>
-<t>This specification does not define a separate payload format for the RPP operation being authorized. Instead, the <tt>data</tt> property of a transaction request MUST contain the same JSON request message that would normally be sent directly to the RPP server for the corresponding operation, using the mapping rules and object representations defined in <xref target="I-D.ietf-rpp-json"></xref>.</t>
+<t>This specification does not define a separate payload format for the RPP operation being authorized. After requesting authorization the 3rd party MUST perform the change by  executing the RPP operation defined for the approved authorization.</t>
 
 <section anchor="domain-name-server-update"><name>Domain Name Server Update</name>
 <t>The <tt>rpp:mpa-type:domain:ns-update</tt> transaction type is used to update the delegation details for a domain name, by replacing the set of Host Data Objects referenced in the domain's <tt>nameservers</tt> property with a new set of Host Data Objects. The <tt>objectId</tt> property MUST contain the domain name of the target Domain Name Object.</t>
-<t>The <tt>data</tt> property MUST contain a valid RPP JSON partial update request body (a JSON Patch document, as defined in the Partial Update rules of <xref target="I-D.ietf-rpp-json"></xref>), consisting of one <tt>replace</tt> operation for each existing Host Data Object being replaced. Each operation's <tt>path</tt> MUST be <tt>/nameservers</tt>, its <tt>match</tt> property MUST identify the existing Host Data Object being replaced by its <tt>hostName</tt>, and its <tt>value</tt> property MUST contain the new Host Data Object.</t>
 <t><strong>TODO</strong></t>
 </section>
 
 <section anchor="domain-dnssec-update"><name>Domain DNSSEC Update</name>
 <t>The <tt>rpp:mpa-type:domain:dnssec-update</tt> transaction type is used to update the DNSSEC related records of a domain name, by replacing the set of DS or DNSKEY records referenced in the domain's <tt>dns</tt> property with a new set of DS or DNSKEY records. The <tt>objectId</tt> property MUST contain the domain name of the target Domain Name Object.</t>
-<t>The <tt>data</tt> property MUST contain a valid RPP JSON partial update request body (a JSON Patch document, as defined in the Partial Update rules of <xref target="I-D.ietf-rpp-json"></xref>).</t>
 <t><strong>TODO</strong></t>
 </section>
 
 <section anchor="domain-transfer"><name>Domain Transfer</name>
-<t>The <tt>rpp:mpa-type:domain:transfer</tt> transaction type is used to transfer the sponsorship of a domain to another registrar. The <tt>objectId</tt> property MUST contain the domain name of the target Domain Name Object, and the <tt>data</tt> property MUST contain a valid Transfer Process Object create request body, as defined in <xref target="I-D.ietf-rpp-json"></xref>, for the transfer operation described in <xref target="I-D.ietf-rpp-core"></xref>.</t>
+<t>The <tt>rpp:mpa-type:domain:transfer</tt> transaction type is used to transfer the sponsorship of a domain to another registrar. The <tt>objectId</tt> property MUST contain the domain name of the target Domain Name Object.</t>
 <t><strong>TODO</strong></t>
 </section>
 </section>
@@ -627,24 +1143,14 @@ Content-Type: application/json
 </section>
 
 <section anchor="domain-name-server-update-request"><name>Domain Name Server Update Request</name>
-<t>Example 3rd party request to registry to replace the nameservers of a domain object with a new set of Host Data Objects. The <tt>data</tt> property contains an RPP JSON partial update (JSON Patch) request body as defined in <xref target="I-D.ietf-rpp-json"></xref>, with one <tt>replace</tt> operation for the existing nameservers. The example below shows a request to update the domain <tt>test1.example</tt>, replacing the existing nameservers with <tt>ns1.dns.example</tt> and <tt>ns2.dns.example</tt>:</t>
+<t>Example 3rd party request to registry to replace the nameservers of a domain object with a new set of Host Data Objects.</t>
 
 <sourcecode type="json"><![CDATA[{
   "@type": "authorisation",
   "transactionType": "rpp:mpa-type:domain:ns-update",
   "timestamp": "2027-06-01T12:00:00Z",
   "expiration": "2027-06-01T12:10:00Z",
-  "objectId": "test1.example",
-  "data": [
-    {
-      "op": "replace",
-      "path": "/nameservers",
-      "value": [
-        { "@type": "host", "hostName": "ns1.dns.example" },
-        { "@type": "host", "hostName": "ns2.dns.example" }
-      ] 
-    }
-  ]
+  "objectId": "test1.example"
 }
 ]]>
 </sourcecode>
@@ -653,34 +1159,14 @@ Content-Type: application/json
 </section>
 
 <section anchor="domain-dnssec-update-request"><name>Domain DNSSEC Update Request</name>
-<t>Example 3rd party request to registry to replace the DNSSEC DS records of a domain object with a new set of DS records. The <tt>data</tt> property contains an RPP JSON partial update (JSON Patch) request body as defined in <xref target="I-D.ietf-rpp-json"></xref>, with one <tt>replace</tt> operation for the existing DS records. The example below shows a request to update the domain <tt>test1.example</tt>, replacing the existing DS records with a new DS record with key tag <tt>12345</tt>:</t>
+<t>Example 3rd party request to registry to replace the DNSSEC DS records of a domain object with a new set of DS records.</t>
 
 <sourcecode type="json"><![CDATA[{
   "@type": "authorisation",
   "transactionType": "rpp:mpa-type:domain:dnssec-update",
   "timestamp": "2027-06-01T12:00:00Z",
   "expiration": "2027-06-01T12:10:00Z",
-  "objectId": "test1.example",
-  "data": [
-    {
-      "op": "replace",
-      "path": "/dns",
-      "value": {
-        "@type": "dnsData",
-        "records": [
-            { "@type": "dnsRecord", 
-              "name": "@",
-              "type": "ds",
-              "rdata": { "keyTag": 12345,
-                         "algorithm": 8,
-                         "digestType": 2,
-                         "digest": "ABCDEF1234567890"
-                       }
-            }
-        ]
-      }
-    }
-  ]
+  "objectId": "test1.example"
 }
 ]]>
 </sourcecode>
@@ -689,7 +1175,7 @@ Content-Type: application/json
 </section>
 
 <section anchor="domain-transfer-request"><name>Domain Transfer Request</name>
-<t>Example 3rd party request to registry to transfer the management of a domain object. The <tt>data</tt> property contains a Transfer Process Object as defined in <xref target="I-D.ietf-rpp-json"></xref>:</t>
+<t>Example 3rd party request to registry to transfer the management of a domain object:</t>
 
 <sourcecode type="json"><![CDATA[{
   "@type": "authorisation",
@@ -697,11 +1183,7 @@ Content-Type: application/json
   "id": "TR-12345",
   "timestamp": "2027-06-01T12:00:00Z",
   "expiration": "2027-06-01T12:10:00Z",
-  "objectId": "test1.example",
-  "data": {
-    "@type": "transferProcess",
-    "transferDir": "pull"
-  }
+  "objectId": "test1.example"
 }
 ]]>
 </sourcecode>
@@ -717,10 +1199,6 @@ Content-Type: application/json
   "objectId": "test1.example",
   "requestorId": "ORG-3RDPARTY-1",
   "requestorName": "Example Registrar",
-  "data": {
-    "@type": "transferProcess",
-    "transferDir": "pull"
-  },
   "signatures": [
     {
       "keyId": "my-registry-key-1",
@@ -747,10 +1225,6 @@ Content-Type: application/json
     "approved": true,
     "approvedBy": "registrar-admin@example-registrar.example",
     "timestamp": "2027-06-01T12:05:00Z"
-  },
-  "data": {
-    "@type": "transferProcess",
-    "transferDir": "pull"
   },
   "signatures": [
     {
@@ -779,6 +1253,7 @@ Content-Type: application/json
 <t>Signature verification MUST be performed locally by each verifying party using the public key of the signer, rather than by querying the signer's system at verification time. In particular, the registrar MUST verify the registry's signature (and the registry's verification of the 3rd party's signature) using the registry's public key, and MUST NOT rely on a live call back to the registry to confirm that a signature is valid. The registry already re-verifies all signatures, when the fully-signed request is submitted for execution (see <xref target="architectural-overview"></xref>).</t>
 <t>This document does not specify any authorization and authentication mechanisms for the 3rd party, registry, and registrar to secure the HTTP endpoints used to exchange requests and responses. It is RECOMMENDED to use OAuth 2.0 for RPP, as described in <xref target="I-D.wullink-rpp-oauth2"></xref>.</t>
 <t>The cryptographic algorithms and key management practices used to sign and verify requests are outside the scope of this document, but it is RECOMMENDED that parties follow best practices for cryptographic security.</t>
+<t>Securing the HTTP endpoints used in the multi-party authorization flow is out of scope for this document, but it is RECOMMENDED that OAuth 2.0 for RPP, as described in <xref target="I-D.wullink-rpp-oauth2"></xref>, be used.</t>
 <t><strong>TODO</strong></t>
 </section>
 
@@ -805,54 +1280,48 @@ Content-Type: application/json
 
 <tr>
 <td>14002</td>
-<td>400 Bad Request</td>
-<td>The <tt>data</tt> property does not conform to the RPP JSON request body expected for the given <tt>transactionType</tt>.</td>
-</tr>
-
-<tr>
-<td>14003</td>
 <td>404 Not Found</td>
 <td>The <tt>objectId</tt> does not identify an existing object.</td>
 </tr>
 
 <tr>
-<td>14004</td>
+<td>14003</td>
 <td>403 Forbidden</td>
 <td>One or more required signatures are missing or fail cryptographic verification.</td>
 </tr>
 
 <tr>
-<td>14005</td>
+<td>14004</td>
 <td>400 Bad Request</td>
 <td>A <tt>keyId</tt> referenced in the request does not match any public key currently provisioned by the identified party.</td>
 </tr>
 
 <tr>
-<td>14006</td>
+<td>14005</td>
 <td>403 Forbidden</td>
 <td>The 3rd party is not accredited by the registry to perform the requested operation on the referenced object.</td>
 </tr>
 
 <tr>
-<td>14007</td>
+<td>14006</td>
 <td>403 Forbidden</td>
 <td>The identified registrar is not the current sponsoring registrar of record for the referenced object.</td>
 </tr>
 
 <tr>
-<td>14008</td>
+<td>14007</td>
 <td>400 Bad Request</td>
 <td>The <tt>expiration</tt> timestamp of the request has already passed.</td>
 </tr>
 
 <tr>
-<td>14009</td>
+<td>14008</td>
 <td>409 Conflict</td>
 <td>The <tt>id</tt> of the request has already been used by a previously completed or in-progress transaction.</td>
 </tr>
 
 <tr>
-<td>14010</td>
+<td>14009</td>
 <td>403 Forbidden</td>
 <td>The registrant did not approve the requested operation at the registrar's consent screen.</td>
 </tr>
@@ -946,7 +1415,28 @@ Registration procedure: Expert Review
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-rpp-core.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-rpp-data-objects.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-rpp-json.xml"/>
+<reference anchor="I-D.wullink-rpp-extension-guidelines" target="https://datatracker.ietf.org/doc/draft-wullink-rpp-extension-guidelines/">
+  <front>
+    <title>Extension Guidelines for RESTful Provisioning Protocol (RPP)</title>
+    <author fullname="Maarten Wullink" initials="M." surname="Wullink">
+      <organization>SIDN Labs</organization>
+    </author>
+    <author fullname="Pawel Kowalik" initials="P." surname="Kowalik">
+      <organization>DENIC</organization>
+    </author>
+    <date></date>
+  </front>
+</reference>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.wullink-rpp-oauth2.xml"/>
+<reference anchor="IANA.JOSE" target="https://www.iana.org/assignments/jose/jose.xhtml">
+  <front>
+    <title>JSON Object Signing and Encryption (JOSE)</title>
+    <author>
+      <organization>IANA</organization>
+    </author>
+    <date></date>
+  </front>
+</reference>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3986.xml"/>
 <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7517.xml"/>
