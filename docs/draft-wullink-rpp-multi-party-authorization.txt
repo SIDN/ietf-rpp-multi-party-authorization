@@ -67,7 +67,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
-   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   4
    3.  Conventions Used in This Document . . . . . . . . . . . . . .   4
    4.  Architectural Overview  . . . . . . . . . . . . . . . . . . .   4
      4.1.  Authorization Request . . . . . . . . . . . . . . . . . .   5
@@ -83,29 +83,29 @@ Table of Contents
          5.2.1.1.  Create (Request)  . . . . . . . . . . . . . . . .  15
          5.2.1.2.  Read  . . . . . . . . . . . . . . . . . . . . . .  15
          5.2.1.3.  Update (Decision) . . . . . . . . . . . . . . . .  15
-         5.2.1.4.  Delete (Revoke) . . . . . . . . . . . . . . . . .  15
-       5.2.2.  Usage of elements by parties  . . . . . . . . . . . .  15
-       5.2.3.  JSON Schema . . . . . . . . . . . . . . . . . . . . .  16
-     5.3.  Organization Data Object  . . . . . . . . . . . . . . . .  17
-       5.3.1.  Approval Redirect URL . . . . . . . . . . . . . . . .  18
-       5.3.2.  Return Redirect URL . . . . . . . . . . . . . . . . .  18
-       5.3.3.  Data Eelements  . . . . . . . . . . . . . . . . . . .  19
-       5.3.4.  JSON Schema . . . . . . . . . . . . . . . . . . . . .  20
-   6.  Process Objects . . . . . . . . . . . . . . . . . . . . . . .  20
-     6.1.  Authorisation Process Object  . . . . . . . . . . . . . .  20
-       6.1.1.  Operations  . . . . . . . . . . . . . . . . . . . . .  21
-         6.1.1.1.  Create (Request)  . . . . . . . . . . . . . . . .  21
-         6.1.1.2.  Read  . . . . . . . . . . . . . . . . . . . . . .  21
-         6.1.1.3.  Update (Decision) . . . . . . . . . . . . . . . .  21
-         6.1.1.4.  Delete (Revoke) . . . . . . . . . . . . . . . . .  22
-   7.  Request Processing  . . . . . . . . . . . . . . . . . . . . .  22
-     7.1.  Third Party . . . . . . . . . . . . . . . . . . . . . . .  22
-     7.2.  Registry  . . . . . . . . . . . . . . . . . . . . . . . .  22
-     7.3.  Registrar . . . . . . . . . . . . . . . . . . . . . . . .  23
-   8.  Authorisation Lifecycle . . . . . . . . . . . . . . . . . . .  23
-   9.  Request Signing and Verification  . . . . . . . . . . . . . .  26
-     9.1.  Public Keys . . . . . . . . . . . . . . . . . . . . . . .  26
-       9.1.1.  JSON Schema . . . . . . . . . . . . . . . . . . . . .  27
+         5.2.1.4.  Delete (Revoke) . . . . . . . . . . . . . . . . .  16
+       5.2.2.  Usage of elements by parties  . . . . . . . . . . . .  16
+       5.2.3.  JSON Schema . . . . . . . . . . . . . . . . . . . . .  17
+         5.2.3.1.  Create  . . . . . . . . . . . . . . . . . . . . .  17
+         5.2.3.2.  Read  . . . . . . . . . . . . . . . . . . . . . .  18
+         5.2.3.3.  Update  . . . . . . . . . . . . . . . . . . . . .  19
+         5.2.3.4.  Delete  . . . . . . . . . . . . . . . . . . . . .  19
+     5.3.  Organization Data Object  . . . . . . . . . . . . . . . .  19
+       5.3.1.  Approval Redirect URL . . . . . . . . . . . . . . . .  19
+       5.3.2.  Return Redirect URL . . . . . . . . . . . . . . . . .  20
+       5.3.3.  Data Eelements  . . . . . . . . . . . . . . . . . . .  20
+       5.3.4.  JSON Schema . . . . . . . . . . . . . . . . . . . . .  21
+     5.4.  Domain Name Data Object . . . . . . . . . . . . . . . . .  22
+       5.4.1.  Operations  . . . . . . . . . . . . . . . . . . . . .  22
+         5.4.1.1.  Authorisation Operations  . . . . . . . . . . . .  22
+     5.5.  Host Data Object  . . . . . . . . . . . . . . . . . . . .  22
+   6.  Request Processing  . . . . . . . . . . . . . . . . . . . . .  22
+     6.1.  Third Party . . . . . . . . . . . . . . . . . . . . . . .  22
+     6.2.  Registry  . . . . . . . . . . . . . . . . . . . . . . . .  22
+     6.3.  Registrar . . . . . . . . . . . . . . . . . . . . . . . .  23
+   7.  Authorisation Lifecycle . . . . . . . . . . . . . . . . . . .  23
+   8.  Request Signing and Verification  . . . . . . . . . . . . . .  26
+     8.1.  Public Keys . . . . . . . . . . . . . . . . . . . . . . .  26
 
 
 
@@ -114,34 +114,36 @@ Wullink & Kowalik          Expires 18 May 2027                  [Page 2]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
-     9.2.  Canonicalization and Signing Input  . . . . . . . . . . .  27
-     9.3.  Registry  . . . . . . . . . . . . . . . . . . . . . . . .  28
-     9.4.  Registrar . . . . . . . . . . . . . . . . . . . . . . . .  28
-   10. Transaction Types . . . . . . . . . . . . . . . . . . . . . .  29
-     10.1.  Domain Name Server Update  . . . . . . . . . . . . . . .  29
-     10.2.  Domain DNSSEC Update . . . . . . . . . . . . . . . . . .  29
-     10.3.  Domain Transfer  . . . . . . . . . . . . . . . . . . . .  29
-   11. HTTP  . . . . . . . . . . . . . . . . . . . . . . . . . . . .  30
-     11.1.  Endpoints  . . . . . . . . . . . . . . . . . . . . . . .  30
-   12. Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  31
-     12.1.  Key provisioning . . . . . . . . . . . . . . . . . . . .  31
-     12.2.  Redirection URL management . . . . . . . . . . . . . . .  32
-     12.3.  Domain Name Server Update Request  . . . . . . . . . . .  33
-     12.4.  Domain DNSSEC Update Request . . . . . . . . . . . . . .  33
-     12.5.  Domain Transfer Request  . . . . . . . . . . . . . . . .  33
-   13. Security Considerations . . . . . . . . . . . . . . . . . . .  35
-   14. Result Codes  . . . . . . . . . . . . . . . . . . . . . . . .  37
-     14.1.  Client Errors  . . . . . . . . . . . . . . . . . . . . .  37
-     14.2.  Server Errors  . . . . . . . . . . . . . . . . . . . . .  38
-   15. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  39
-   16. Internationalization Considerations . . . . . . . . . . . . .  40
-   17. Privacy Considerations  . . . . . . . . . . . . . . . . . . .  40
-   18. Change History  . . . . . . . . . . . . . . . . . . . . . . .  40
-   19. References  . . . . . . . . . . . . . . . . . . . . . . . . .  40
-     19.1.  Normative References . . . . . . . . . . . . . . . . . .  40
-     19.2.  Informative References . . . . . . . . . . . . . . . . .  41
-   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .  42
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  42
+       8.1.1.  JSON Schema . . . . . . . . . . . . . . . . . . . . .  27
+     8.2.  Canonicalization and Signing Input  . . . . . . . . . . .  27
+     8.3.  Registry  . . . . . . . . . . . . . . . . . . . . . . . .  28
+     8.4.  Registrar . . . . . . . . . . . . . . . . . . . . . . . .  28
+   9.  Transaction Types . . . . . . . . . . . . . . . . . . . . . .  29
+     9.1.  Domain Name Server Update . . . . . . . . . . . . . . . .  29
+     9.2.  Domain DNSSEC Update  . . . . . . . . . . . . . . . . . .  29
+     9.3.  Domain Transfer . . . . . . . . . . . . . . . . . . . . .  29
+   10. HTTP  . . . . . . . . . . . . . . . . . . . . . . . . . . . .  30
+     10.1.  Endpoints  . . . . . . . . . . . . . . . . . . . . . . .  30
+   11. Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .  31
+     11.1.  Key provisioning . . . . . . . . . . . . . . . . . . . .  31
+     11.2.  Redirection URL management . . . . . . . . . . . . . . .  32
+     11.3.  Domain Name Server Update Request  . . . . . . . . . . .  33
+     11.4.  Domain DNSSEC Update Request . . . . . . . . . . . . . .  33
+     11.5.  Domain Transfer Request  . . . . . . . . . . . . . . . .  33
+   12. Security Considerations . . . . . . . . . . . . . . . . . . .  35
+   13. Result Codes  . . . . . . . . . . . . . . . . . . . . . . . .  37
+     13.1.  Client Errors  . . . . . . . . . . . . . . . . . . . . .  37
+     13.2.  Server Errors  . . . . . . . . . . . . . . . . . . . . .  38
+   14. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  39
+     14.1.  RPP Data Object Registry . . . . . . . . . . . . . . . .  40
+   15. Internationalization Considerations . . . . . . . . . . . . .  43
+   16. Privacy Considerations  . . . . . . . . . . . . . . . . . . .  43
+   17. Change History  . . . . . . . . . . . . . . . . . . . . . . .  43
+   18. References  . . . . . . . . . . . . . . . . . . . . . . . . .  43
+     18.1.  Normative References . . . . . . . . . . . . . . . . . .  43
+     18.2.  Informative References . . . . . . . . . . . . . . . . .  44
+   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .  45
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  45
 
 1.  Introduction
 
@@ -158,9 +160,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    registrar trusts the registry to only accept requests from accredited
    3rd parties.
 
-2.  Terminology
 
-   In this document the following terminology is used.
 
 
 
@@ -169,6 +169,10 @@ Wullink & Kowalik          Expires 18 May 2027                  [Page 3]
 
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
+
+2.  Terminology
+
+   In this document the following terminology is used.
 
    URL - A Uniform Resource Locator as defined in [RFC3986].
 
@@ -214,10 +218,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    resource.  The multi-party authorization flow described in this
    document ensures that the registrant's consent is obtained before any
    RPP operations are executed.
-
-
-
-
 
 
 
@@ -676,12 +676,12 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 5.2.  Authorisation Data Object
 
-   This specification defines a new Authorisation Process Object...
+   This specification defines a new Authorisation Data Object...
 
-   -  Name: Authorisation Process Object
+   -  Name: Authorisation Data Object
    -  Identifier: authorisation
    -  Unique Identifier: id
-   -  Description: An Authorisation Process Object represents the
+   -  Description: An Authorisation Data Object represents the
       authorisation information for 3rd party access to a specific RPP
       operation on an object resource.
    -  Data Elements:
@@ -816,15 +816,68 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 5.2.1.2.  Read
 
-   *TODO*
+   -  Identifier: read
+
+   The Read operation allows a client to retrieve the data elements of
+   an Authorisation Data Object.
+
+   -  Authorisation:
+      -  Only the 3rd party and registrar involved in the authorisation
+         process are authorised to retrieve the authorisation data.  The
+         server MAY restrict the information returned based on client
+         identity and server policy.
 
 5.2.1.3.  Update (Decision)
 
-   *TODO*
+   -  Identifier: update
+
+   The Update operation allows a client to modify the attributes of an
+   existing Authorisation Data Object.
+
+
+
+
+Wullink & Kowalik          Expires 18 May 2027                 [Page 15]
+
+Internet-Draft      Multi-Party Authorization for RPP      November 2026
+
+
+   -  Authorisation:
+      -  Only the registrar involved in the authorisation process is
+         authorised to make a decision on the authorisation request.
+
+   The following transient data elements are defined for this operation:
+
+   -  Signatures
+      -  Identifier: signatures
+      -  Cardinality: 0+
+      -  Mutability: read-write
+      -  Data Type: Signature Object
+      -  Description: The digital signatures of the authorisation
+         request, used to verify the authenticity and integrity of the
+         request.
+      -  Constraints: (none)
+   -  Approval
+      -  Identifier: approval
+      -  Cardinality: 0-1
+      -  Mutability: read-write
+      -  Data Type: Approval Object
+      -  Description: The approval status of the authorisation request,
+         used to verify the consent of the approving party.
+      -  Constraints: (none)
 
 5.2.1.4.  Delete (Revoke)
 
-   *TODO*
+   -  Identifier: delete
+
+   The Delete operation allows a client to remove an existing
+   Authorisation Data Object.  The operation targets a specific data
+   object identified by its Object ID.
+
+   -  Authorisation:
+      -  Only the 3rd party and registrar involved in the authorisation
+         process and the registry are authorised to delete the
+         authorisation data object.
 
 5.2.2.  Usage of elements by parties
 
@@ -837,7 +890,10 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
 
-Wullink & Kowalik          Expires 18 May 2027                 [Page 15]
+
+
+
+Wullink & Kowalik          Expires 18 May 2027                 [Page 16]
 
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
@@ -882,6 +938,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    references the Signature and Approval component object schemas
    defined in Section 5.1.5.
 
+5.2.3.1.  Create
 
 
 
@@ -892,8 +949,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
 
-
-Wullink & Kowalik          Expires 18 May 2027                 [Page 16]
+Wullink & Kowalik          Expires 18 May 2027                 [Page 17]
 
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
@@ -902,6 +958,24 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
      "$ref": "#/$defs/authorisation.create",
      "$defs": {
        "authorisation.create": {
+         "type": "object",
+         "properties": {
+           "@type": { "type": "string", "const": "authorisation" },
+           "transactionType": { "type": "string", "enum": ["rpp:mpa-type:domain:ns-update", "rpp:mpa-type:domain:dnssec-update", "rpp:mpa-type:domain:transfer"] },
+           "objectId": { "type": "string" },
+           "usage": { "type": "string", "enum": ["single-use", "multi-use"] },
+         },
+         "required": ["@type", "transactionType", "objectId", "usage"]
+       }
+     }
+   }
+
+5.2.3.2.  Read
+
+   {
+     "$ref": "#/$defs/authorisation.read",
+     "$defs": {
+       "authorisation.read": {
          "type": "object",
          "properties": {
            "@type": { "type": "string", "const": "authorisation" },
@@ -923,14 +997,26 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
            "approval": { "$ref": "#/$defs/approval" },
            "status": { "$ref": "#/$defs/status" }
          },
-         "required": ["@type", "transactionType", "timestamp", "expiration", "objectId", "requestorId", "status"]
+         "required": ["@type", "transactionType", "objectId", "status", "usage", "timestamp", "expiration", "requestorId", "requestorName", "approvalUrl", "returnUrl", "signatures", "approval"]
        }
      }
    }
 
-   *TODO* currently using single schema where depending on client ,
-   registry or registrar some fields are required and some are optional.
-   Could also define separate schemas for each party.
+
+
+
+Wullink & Kowalik          Expires 18 May 2027                 [Page 18]
+
+Internet-Draft      Multi-Party Authorization for RPP      November 2026
+
+
+5.2.3.3.  Update
+
+   *TODO*
+
+5.2.3.4.  Delete
+
+   *TODO*
 
 5.3.  Organization Data Object
 
@@ -941,18 +1027,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    browser is redirected after the registrant has approved or denied the
    requested operation.  The approvalUrl and returnUrl MUST be valid
    URLs, and they MUST use the HTTPS scheme.
-
-
-
-
-
-
-
-
-Wullink & Kowalik          Expires 18 May 2027                 [Page 17]
-
-Internet-Draft      Multi-Party Authorization for RPP      November 2026
-
 
    The registry and the registrar MUST redirect the client's browser
    using a 303 See Other response, with the Location header set to the
@@ -982,6 +1056,16 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    HTTP/1.1 303 See Other
    Location: https://registrar.example/rpp-auth/approve?approval-state=abc123
 
+
+
+
+
+
+Wullink & Kowalik          Expires 18 May 2027                 [Page 19]
+
+Internet-Draft      Multi-Party Authorization for RPP      November 2026
+
+
 5.3.2.  Return Redirect URL
 
    A 3rd party that supports multi-party authorization MUST provide a
@@ -998,17 +1082,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
    HTTP/1.1 303 See Other
    Location: https://thirdparty.example/rpp-auth/callback?approval-state=abc123
-
-
-
-
-
-
-
-Wullink & Kowalik          Expires 18 May 2027                 [Page 18]
-
-Internet-Draft      Multi-Party Authorization for RPP      November 2026
-
 
 5.3.3.  Data Eelements
 
@@ -1041,6 +1114,14 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
             represents a registrar or reseller supporting multi-party
             approval.
 
+
+
+
+Wullink & Kowalik          Expires 18 May 2027                 [Page 20]
+
+Internet-Draft      Multi-Party Authorization for RPP      November 2026
+
+
    -  Approval Return URI
 
       -  Identifier: approvalReturnUri
@@ -1057,14 +1138,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
       |  TODO: define the approvalRedirectUri and approvalReturnUri
       |  here, or in the multi-party approval spec?  TODO: define an
       |  IANA registry for user roles?
-
-
-
-
-Wullink & Kowalik          Expires 18 May 2027                 [Page 19]
-
-Internet-Draft      Multi-Party Authorization for RPP      November 2026
-
 
 5.3.4.  JSON Schema
 
@@ -1098,79 +1171,6 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
      }
    }
 
-6.  Process Objects
-
-6.1.  Authorisation Process Object
-
-   This specification defines a new Authorisation Process Object...
-
-   -  Name: Authorisation Process Object
-   -  Identifier: authorisationProcess
-   -  Unique Identifier: processId
-   -  Description: Represents the process initiated when a resource
-      creation operation is performed.  It carries creation-specific
-      inputs that are consumed during the creation operation and are not
-      stored as persistent attributes of the created resource object.
-   -  Data Elements:
-      -  Process ID
-         -  Identifier: processId
-
-
-
-Wullink & Kowalik          Expires 18 May 2027                 [Page 20]
-
-Internet-Draft      Multi-Party Authorization for RPP      November 2026
-
-
-         -  Cardinality: 0-1
-         -  Mutability: read-only
-         -  Data Type: String
-         -  Description: A server-assigned identifier of the process
-            instance, unique within the scope of the Owner Data Object.
-         -  Constraints: The value is set by the server and cannot be
-            specified by the client.
-
-6.1.1.  Operations
-
-6.1.1.1.  Create (Request)
-
-   -  Identifier: create
-
-   -  Input: Authorisation Process Object (create-only and read-write
-      elements)
-
-   -  Output: Authorisation Process Object
-
-   -  Authorisation:
-
-      -  Inherited from the resource object create operation that
-         initiates this process.
-
-   The following transient data elements are defined for this operation:
-
-   -  Signatures
-      -  Identifier: signatures
-      -  Cardinality: 0+
-      -  Mutability: read-write
-      -  Data Type: Signature Object
-      -  Description: The digital signatures of the authorisation
-         request, used to verify the authenticity and integrity of the
-         request.
-      -  Constraints: (none)
-
-6.1.1.2.  Read
-
-   *TODO*
-
-6.1.1.3.  Update (Decision)
-
-   The following transient data elements are defined for this operation:
-
-   -  Signatures
-      -  Identifier: signatures
-      -  Cardinality: 0+
-      -  Mutability: read-write
-
 
 
 Wullink & Kowalik          Expires 18 May 2027                 [Page 21]
@@ -1178,39 +1178,37 @@ Wullink & Kowalik          Expires 18 May 2027                 [Page 21]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
-      -  Data Type: Signature Object
-      -  Description: The digital signatures of the authorisation
-         request, used to verify the authenticity and integrity of the
-         request.
-      -  Constraints: (none)
-   -  Approval
-      -  Identifier: approval
-      -  Cardinality: 0-1
-      -  Mutability: read-write
-      -  Data Type: Approval Object
-      -  Description: The approval status of the authorisation request,
-         used to verify the consent of the approving party.
-      -  Constraints: (none)
+5.4.  Domain Name Data Object
+
+5.4.1.  Operations
+
+5.4.1.1.  Authorisation Operations
+
+   The Domain Name Data Object supports all the authorisation operations
+   defined in Section 5.2.1.
 
    *TODO*
 
-6.1.1.4.  Delete (Revoke)
+5.5.  Host Data Object
+
+   The Host Data Object supports all the authorisation operations
+   defined in Section 5.2.1.
 
    *TODO*
 
-7.  Request Processing
+6.  Request Processing
 
    The request is initiated by the 3rd party, and validated and
    processed by both the registry and registrar.  The request MUST be
    signed by both the registry and registrar.
 
-7.1.  Third Party
+6.1.  Third Party
 
    The 3rd party constructs the request, setting the transactionType,
    objectId, and expiration properties, and sends the request to the
    registry.
 
-7.2.  Registry
+6.2.  Registry
 
    The registry MUST validate each request, the following properties
    MUST be present and valid:
@@ -1225,7 +1223,9 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    subsequent requests for the same transactionType and objectId that
    have not yet expired.
 
-
+   After validation of the request, creates a response that adds the
+   following properties: id, requestorId, requestorName, approvalUrl,
+   returnUrl, timestamp,signatures.  The id is a unique identifier for
 
 
 
@@ -1234,9 +1234,6 @@ Wullink & Kowalik          Expires 18 May 2027                 [Page 22]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
-   After validation of the request, creates a response that adds the
-   following properties: id, requestorId, requestorName, approvalUrl,
-   returnUrl, timestamp,signatures.  The id is a unique identifier for
    the transaction.  The requestorId is the identifier of the 3rd party
    that created the request, the requestorName is the public name of the
    requestor to be displayed in the consent screen.  The approvalUrl is
@@ -1247,7 +1244,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    add its signature of the request to the signatures array, it MUST be
    the first element in the array.
 
-7.3.  Registrar
+6.3.  Registrar
 
    The registrar adds the approval object to the request, to indicate
    whether the registrant and registrar have approved the transfer; at
@@ -1257,10 +1254,13 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    array.  The registrar MUST verify the signature of the registry using
    the public key linked to the public key identifier in the request.
 
-8.  Authorisation Lifecycle
+7.  Authorisation Lifecycle
 
    The diagram in Figure 2 illustrates the states of an Authorisation
    Data Object over its lifetime.
+
+
+
 
 
 
@@ -1414,7 +1414,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    been rescinded, so that the 3rd party can stop relying on it and,
    where applicable, notify its own client.
 
-9.  Request Signing and Verification
+8.  Request Signing and Verification
 
    Both the registry and the registrar MUST cryptographically sign, and
    verify the authenticity and integrity of the requests.  The specific
@@ -1426,7 +1426,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    MUST include its public key identifier in the request, so that other
    parties can verify the signature using the corresponding public key.
 
-9.1.  Public Keys
+8.1.  Public Keys
 
    A registrar that wants to participate in multi-party authorization
    MUST provide at least one public key to the registry.  Each key is
@@ -1480,11 +1480,11 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
      ]
    }
 
-9.1.1.  JSON Schema
+8.1.1.  JSON Schema
 
    *TODO*
 
-9.2.  Canonicalization and Signing Input
+8.2.  Canonicalization and Signing Input
 
    Signers MUST NOT construct the signature input by naively
    concatenating field values as strings.  Ad hoc concatenation is
@@ -1520,7 +1520,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    public key identifier alongside its signature, so that other parties
    can verify the signature using the corresponding public key.
 
-9.3.  Registry
+8.3.  Registry
 
    The registry MUST verify the transaction request, and copy the
    document to a response document while adding additional transaction
@@ -1542,7 +1542,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    The registry inserts the signature as an object in the signatures
    array.
 
-9.4.  Registrar
+8.4.  Registrar
 
    The registrar MUST verify the signature of the registry using the
    public key linked to the public key identifier found in the first
@@ -1570,12 +1570,12 @@ Wullink & Kowalik          Expires 18 May 2027                 [Page 28]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
-10.  Transaction Types
+9.  Transaction Types
 
    A transaction type allows access to specific RPP operations.  This
    specification defines three distinct transaction types.  Future
    specifications may define additional transaction types, which MUST be
-   registered with IANA as described in Section 15.
+   registered with IANA as described in Section 14.
 
    -  rpp:mpa-type:domain:ns-update
    -  rpp:mpa-type:domain:dnssec-update
@@ -1586,7 +1586,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    3rd party MUST perform the change by executing the RPP operation
    defined for the approved authorization.
 
-10.1.  Domain Name Server Update
+9.1.  Domain Name Server Update
 
    The rpp:mpa-type:domain:ns-update transaction type is used to update
    the delegation details for a domain name, by replacing the set of
@@ -1596,7 +1596,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
    *TODO*
 
-10.2.  Domain DNSSEC Update
+9.2.  Domain DNSSEC Update
 
    The rpp:mpa-type:domain:dnssec-update transaction type is used to
    update the DNSSEC related records of a domain name, by replacing the
@@ -1606,7 +1606,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
    *TODO*
 
-10.3.  Domain Transfer
+9.3.  Domain Transfer
 
    The rpp:mpa-type:domain:transfer transaction type is used to transfer
    the sponsorship of a domain to another registrar.  The objectId
@@ -1626,9 +1626,9 @@ Wullink & Kowalik          Expires 18 May 2027                 [Page 29]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
-11.  HTTP
+10.  HTTP
 
-11.1.  Endpoints
+10.1.  Endpoints
 
    The following non normative table lists RPP endpoints related to
    Authorisation Objects, each derived by applying the rules defined in
@@ -1704,9 +1704,9 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
    *TODO*
 
-12.  Examples
+11.  Examples
 
-12.1.  Key provisioning
+11.1.  Key provisioning
 
    A registrar supporting multi-party authorization MUST provide at
    least 1 public key at the registry.  Public keys are provisioned by
@@ -1761,7 +1761,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    of the current loggedin user, makes things easier for clients, will
    need to update core doc.
 
-12.2.  Redirection URL management
+11.2.  Redirection URL management
 
    The registrar's approvalUrl and the 3rd party's returnUrl of their
    respective Organisation Data Object MUST be set, and MUST be valid
@@ -1794,7 +1794,7 @@ Wullink & Kowalik          Expires 18 May 2027                 [Page 32]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
-12.3.  Domain Name Server Update Request
+11.3.  Domain Name Server Update Request
 
    Example 3rd party request to registry to replace the nameservers of a
    domain object with a new set of Host Data Objects.
@@ -1811,7 +1811,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
    Example Registrar Response: *TODO*
 
-12.4.  Domain DNSSEC Update Request
+11.4.  Domain DNSSEC Update Request
 
    Example 3rd party request to registry to replace the DNSSEC DS
    records of a domain object with a new set of DS records.
@@ -1828,7 +1828,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
    Example Registrar Response: *TODO*
 
-12.5.  Domain Transfer Request
+11.5.  Domain Transfer Request
 
    Example 3rd party request to registry to transfer the management of a
    domain object:
@@ -1943,7 +1943,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    party.  The 3rd party can then submit the transfer request to the
    registry, which will execute the transfer operation.
 
-13.  Security Considerations
+12.  Security Considerations
 
    The registrant's explicit consent is required for any RPP operation
    to be executed.  The registrant's consent is obtained through the
@@ -2018,14 +2018,14 @@ Wullink & Kowalik          Expires 18 May 2027                 [Page 36]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
-14.  Result Codes
+13.  Result Codes
 
    This specification defines new RPP result codes for multi-party
    authorization, the new result codes follow the result code classes
    defined in [I-D.ietf-rpp-core]: 14xxx for client errors and 15xxx for
    server errors.  As described in [I-D.ietf-rpp-core].
 
-14.1.  Client Errors
+13.1.  Client Errors
 
    The following client error result codes (class 14xxx) are defined in
    this document:
@@ -2118,7 +2118,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
    *TODO* complete the table with additional result codes
 
-14.2.  Server Errors
+13.2.  Server Errors
 
    The following server error result codes (class 15xxx) are defined in
    this document:
@@ -2146,7 +2146,7 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
    *TODO* complete the table with additional result codes
 
-15.  IANA Considerations
+14.  IANA Considerations
 
    IANA is requested to register the result codes defined in Table 4 and
    Table 5 in the "RPP Result codes" registry defined in
@@ -2201,13 +2201,178 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
          Table 6: RPP multi-party authorization transaction types
 
+14.1.  RPP Data Object Registry
+
+   This specification defines new entries in the "RESTful Provisioning
+   Protocol (RPP) Data Object Registry" defined in
+   [I-D.ietf-rpp-data-objects].
+
+   Object: authorisation
+
+   Object Name: Authorisation Data Object
+
+   Object Type: Resource
+
+   Description: Represents the authorisation information for 3rd party
+   access to a specific RPP operation on an object resource.
+
+   Reference: [This-ID]
+
+   Data Elements
+
+   +===============+===========+=====+==========+==========+==============+
+   |Identifier     |Name       |Card.|Mutability|Data Type |Description   |
+   +===============+===========+=====+==========+==========+==============+
+   |transactionType|Transaction|1    |create-   |String    |The type of   |
+   |               |Type       |     |only      |          |transaction   |
+   |               |           |     |          |          |for the       |
+   |               |           |     |          |          |authorisation |
+   |               |           |     |          |          |request, MUST |
+   |               |           |     |          |          |be one of the |
+   |               |           |     |          |          |values        |
+   |               |           |     |          |          |registered in |
+   |               |           |     |          |          |the "RPP      |
+   |               |           |     |          |          |Multi-Party   |
+   |               |           |     |          |          |Transaction   |
+
+
+
+Wullink & Kowalik          Expires 18 May 2027                 [Page 40]
+
+Internet-Draft      Multi-Party Authorization for RPP      November 2026
+
+
+   |               |           |     |          |          |Types"        |
+   |               |           |     |          |          |registry      |
+   |               |           |     |          |          |Table 6.      |
+   +---------------+-----------+-----+----------+----------+--------------+
+   |timestamp      |Timestamp  |1    |create-   |Timestamp |The time the  |
+   |               |           |     |only      |          |authorisation |
+   |               |           |     |          |          |was created.  |
+   +---------------+-----------+-----+----------+----------+--------------+
+   |expiration     |Expiry Time|1    |create-   |Timestamp |The time the  |
+   |               |           |     |only      |          |authorisation |
+   |               |           |     |          |          |expires.      |
+   +---------------+-----------+-----+----------+----------+--------------+
+   |objectId       |Object     |1    |create-   |Identifier|The identifier|
+   |               |Identifier |     |only      |          |of the object |
+   |               |           |     |          |          |the           |
+   |               |           |     |          |          |authorisation |
+   |               |           |     |          |          |is associated |
+   |               |           |     |          |          |with.         |
+   +---------------+-----------+-----+----------+----------+--------------+
+   |requestorId    |Requestor  |1    |read-only |Identifier|The unique    |
+   |               |Id         |     |          |          |organisation  |
+   |               |           |     |          |          |identifier of |
+   |               |           |     |          |          |the           |
+   |               |           |     |          |          |organisation  |
+   |               |           |     |          |          |that created  |
+   |               |           |     |          |          |the           |
+   |               |           |     |          |          |authorisation |
+   |               |           |     |          |          |request.      |
+   +---------------+-----------+-----+----------+----------+--------------+
+   |requestorName  |Requestor  |1    |read-only |String    |The name of   |
+   |               |Name       |     |          |          |the           |
+   |               |           |     |          |          |organisation  |
+   |               |           |     |          |          |that created  |
+   |               |           |     |          |          |the           |
+   |               |           |     |          |          |authorisation |
+   |               |           |     |          |          |request.      |
+   +---------------+-----------+-----+----------+----------+--------------+
+   |approvalUrl    |Approval   |0-1  |read-write|URI       |The URI to    |
+   |               |URL        |     |          |          |which the     |
+   |               |           |     |          |          |client should |
+   |               |           |     |          |          |be redirected |
+   |               |           |     |          |          |for approval. |
+   +---------------+-----------+-----+----------+----------+--------------+
+   |returnUrl      |Return URL |0-1  |read-write|URI       |The URI to    |
+   |               |           |     |          |          |which the     |
+   |               |           |     |          |          |client should |
+   |               |           |     |          |          |be redirected |
+   |               |           |     |          |          |after approval|
+
+
+
+Wullink & Kowalik          Expires 18 May 2027                 [Page 41]
+
+Internet-Draft      Multi-Party Authorization for RPP      November 2026
+
+
+   |               |           |     |          |          |at the        |
+   |               |           |     |          |          |registrar is  |
+   |               |           |     |          |          |complete.     |
+   +---------------+-----------+-----+----------+----------+--------------+
+   |usage          |Usage      |1    |create-   |String    |The usage type|
+   |               |           |     |only      |          |for the       |
+   |               |           |     |          |          |authorisation |
+   |               |           |     |          |          |request, one  |
+   |               |           |     |          |          |of "single-   |
+   |               |           |     |          |          |use" or       |
+   |               |           |     |          |          |"multi-use".  |
+   +---------------+-----------+-----+----------+----------+--------------+
+   |status         |Status     |1    |read-only |Status    |The current   |
+   |               |           |     |          |Object    |lifecycle     |
+   |               |           |     |          |          |status of the |
+   |               |           |     |          |          |authorisation,|
+   |               |           |     |          |          |as described  |
+   |               |           |     |          |          |in Figure 2.  |
+   +---------------+-----------+-----+----------+----------+--------------+
+
+                                  Table 7
+
+   Operations
+
+   Operation: Create
+
+   Operation Identifier: create
+
+   Description: Provisions a new Authorisation Data Object resource,
+   initiating a multi-party authorization request.
+
+   Parameters: (None)
+
+   Operation: Read
+
+   Operation Identifier: read
+
+   Description: Retrieves the data elements of an existing Authorisation
+   Data Object.
+
+   Parameters: (None)
+
+   Operation: Update
+
+   Operation Identifier: update
+
+
+
+
+
+
+Wullink & Kowalik          Expires 18 May 2027                 [Page 42]
+
+Internet-Draft      Multi-Party Authorization for RPP      November 2026
+
+
+   Description: Modifies the attributes of an existing Authorisation
+   Data Object, used to record the registrar's decision on the
+   authorisation request.
+
+   Parameters: (None)
+
+   Operation: Delete
+
+   Operation Identifier: delete
+
+   Description: Removes an existing Authorisation Data Object.
+
+   Parameters: (None)
+
+15.  Internationalization Considerations
+
    *TODO*
 
-16.  Internationalization Considerations
-
-   *TODO*
-
-17.  Privacy Considerations
+16.  Privacy Considerations
 
    The registrant personally identifiable information (PII) is not
    included in the multi-party authorization flow, except for the
@@ -2216,13 +2381,13 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
    *TODO*
 
-18.  Change History
+17.  Change History
 
    *TODO*
 
-19.  References
+18.  References
 
-19.1.  Normative References
+18.1.  Normative References
 
    [I-D.ietf-rpp-core]
               Wullink, M. and P. Kowalik, "RESTful Provisioning Protocol
@@ -2234,17 +2399,16 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    [I-D.ietf-rpp-data-objects]
               Kowalik, P. and M. Wullink, "RESTful Provisioning Protocol
               (RPP) Data Objects", Work in Progress, Internet-Draft,
-
-
-
-Wullink & Kowalik          Expires 18 May 2027                 [Page 40]
-
-Internet-Draft      Multi-Party Authorization for RPP      November 2026
-
-
               draft-ietf-rpp-data-objects-01, 3 July 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-rpp-
               data-objects-01>.
+
+
+
+Wullink & Kowalik          Expires 18 May 2027                 [Page 43]
+
+Internet-Draft      Multi-Party Authorization for RPP      November 2026
+
 
    [I-D.ietf-rpp-json]
               Wullink, M. and P. Kowalik, "JSON for RESTful Provisioning
@@ -2289,11 +2453,15 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
               DOI 10.17487/RFC8785, June 2020,
               <https://www.rfc-editor.org/info/rfc8785>.
 
-19.2.  Informative References
+18.2.  Informative References
 
 
 
-Wullink & Kowalik          Expires 18 May 2027                 [Page 41]
+
+
+
+
+Wullink & Kowalik          Expires 18 May 2027                 [Page 44]
 
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
@@ -2349,4 +2517,4 @@ Authors' Addresses
 
 
 
-Wullink & Kowalik          Expires 18 May 2027                 [Page 42]
+Wullink & Kowalik          Expires 18 May 2027                 [Page 45]

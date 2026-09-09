@@ -384,13 +384,13 @@
 </section>
 
 <section anchor="authorisation-data-object"><name>Authorisation Data Object</name>
-<t>This specification defines a new Authorisation Process Object...</t>
+<t>This specification defines a new Authorisation Data Object...</t>
 
 <ul spacing="compact">
-<li>Name: Authorisation Process Object</li>
+<li>Name: Authorisation Data Object</li>
 <li>Identifier: authorisation</li>
 <li>Unique Identifier: id</li>
-<li>Description: An Authorisation Process Object represents the authorisation information for 3rd party access to a specific RPP operation on an object resource.</li>
+<li>Description: An Authorisation Data Object represents the authorisation information for 3rd party access to a specific RPP operation on an object resource.</li>
 <li><t>Data Elements:</t>
 
 <ul spacing="compact">
@@ -508,7 +508,7 @@
 </ul>
 <t><strong>TODO</strong> use reference to organisation object for requestorId and requestorName, or keep them as separate fields?</t>
 
-<section anchor="operations"><name>Operations</name>
+<section anchor="authorisation-operations"><name>Operations</name>
 
 <section anchor="create-request"><name>Create (Request)</name>
 
@@ -527,15 +527,75 @@
 </section>
 
 <section anchor="read"><name>Read</name>
-<t><strong>TODO</strong></t>
+
+<ul spacing="compact">
+<li>Identifier: read</li>
+</ul>
+<t>The Read operation allows a client to retrieve the data elements of an Authorisation Data Object.</t>
+
+<ul spacing="compact">
+<li><t>Authorisation:</t>
+
+<ul spacing="compact">
+<li>Only the 3rd party and registrar involved in the authorisation process are authorised to retrieve the authorisation data. The server MAY restrict the information returned based on client identity and server policy.</li>
+</ul></li>
+</ul>
 </section>
 
 <section anchor="update-decision"><name>Update (Decision)</name>
-<t><strong>TODO</strong></t>
+
+<ul spacing="compact">
+<li>Identifier: update</li>
+</ul>
+<t>The Update operation allows a client to modify the attributes of an existing Authorisation Data Object.</t>
+
+<ul spacing="compact">
+<li><t>Authorisation:</t>
+
+<ul spacing="compact">
+<li>Only the registrar involved in the authorisation process is authorised to make a decision on the authorisation request.</li>
+</ul></li>
+</ul>
+<t>The following transient data elements are defined for this operation:</t>
+
+<ul spacing="compact">
+<li><t>Signatures</t>
+
+<ul spacing="compact">
+<li>Identifier: signatures</li>
+<li>Cardinality: 0+</li>
+<li>Mutability: read-write</li>
+<li>Data Type: Signature Object</li>
+<li>Description: The digital signatures of the authorisation request, used to verify the authenticity and integrity of the request.</li>
+<li>Constraints: (none)</li>
+</ul></li>
+<li><t>Approval</t>
+
+<ul spacing="compact">
+<li>Identifier: approval</li>
+<li>Cardinality: 0-1</li>
+<li>Mutability: read-write</li>
+<li>Data Type: Approval Object</li>
+<li>Description: The approval status of the authorisation request, used to verify the consent of the approving party.</li>
+<li>Constraints: (none)</li>
+</ul></li>
+</ul>
 </section>
 
 <section anchor="delete-revoke"><name>Delete (Revoke)</name>
-<t><strong>TODO</strong></t>
+
+<ul spacing="compact">
+<li>Identifier: delete</li>
+</ul>
+<t>The Delete operation allows a client to remove an existing Authorisation Data Object. The operation targets a specific data object identified by its Object ID.</t>
+
+<ul spacing="compact">
+<li><t>Authorisation:</t>
+
+<ul spacing="compact">
+<li>Only the 3rd party and registrar involved in the authorisation process and the registry are authorised to delete the authorisation data object.</li>
+</ul></li>
+</ul>
 </section>
 </section>
 
@@ -628,10 +688,33 @@
 <section anchor="authorisation-data-object-json-schema"><name>JSON Schema</name>
 <t>This section provides normative JSON Schema definitions for the transaction types defined in this document. All schemas use JSON Schema draft 2020-12 <xref target="JSON-SCHEMA"></xref>. The schema below represents the Authorisation Data Object defined in <xref target="I-D.ietf-rpp-data-objects"></xref>, and references the Signature and Approval component object schemas defined in <xref target="component-data-objects-json-schema"></xref>.</t>
 
+<section anchor="create"><name>Create</name>
+
 <sourcecode type="json"><![CDATA[{
   "$ref": "#/$defs/authorisation.create",
   "$defs": {
     "authorisation.create": {
+      "type": "object",
+      "properties": {
+        "@type": { "type": "string", "const": "authorisation" },
+        "transactionType": { "type": "string", "enum": ["rpp:mpa-type:domain:ns-update", "rpp:mpa-type:domain:dnssec-update", "rpp:mpa-type:domain:transfer"] },
+        "objectId": { "type": "string" },
+        "usage": { "type": "string", "enum": ["single-use", "multi-use"] },
+      },
+      "required": ["@type", "transactionType", "objectId", "usage"]
+    }
+  }
+}
+]]>
+</sourcecode>
+</section>
+
+<section anchor="read-1"><name>Read</name>
+
+<sourcecode type="json"><![CDATA[{
+  "$ref": "#/$defs/authorisation.read",
+  "$defs": {
+    "authorisation.read": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "authorisation" },
@@ -653,13 +736,21 @@
         "approval": { "$ref": "#/$defs/approval" },
         "status": { "$ref": "#/$defs/status" }
       },
-      "required": ["@type", "transactionType", "timestamp", "expiration", "objectId", "requestorId", "status"]
+      "required": ["@type", "transactionType", "objectId", "status", "usage", "timestamp", "expiration", "requestorId", "requestorName", "approvalUrl", "returnUrl", "signatures", "approval"]
     }
   }
 }
 ]]>
 </sourcecode>
-<t><strong>TODO</strong> currently using single schema where depending on client , registry or registrar some fields are required and some are optional. Could also define separate schemas for each party.</t>
+</section>
+
+<section anchor="update"><name>Update</name>
+<t><strong>TODO</strong></t>
+</section>
+
+<section anchor="delete"><name>Delete</name>
+<t><strong>TODO</strong></t>
+</section>
 </section>
 </section>
 
@@ -780,101 +871,21 @@ TODO: define an IANA registry for user roles?</t>
 </sourcecode>
 </section>
 </section>
-</section>
 
-<section anchor="process-objects"><name>Process Objects</name>
+<section anchor="domain-name-data-object"><name>Domain Name Data Object</name>
 
-<section anchor="authorisation-process-object"><name>Authorisation Process Object</name>
-<t>This specification defines a new Authorisation Process Object...</t>
+<section anchor="operations"><name>Operations</name>
 
-<ul spacing="compact">
-<li>Name: Authorisation Process Object</li>
-<li>Identifier: authorisationProcess</li>
-<li>Unique Identifier: processId</li>
-<li>Description: Represents the process initiated when a resource creation operation is performed. It carries creation-specific inputs that are consumed during the creation operation and are not stored as persistent attributes of the created resource object.</li>
-<li><t>Data Elements:</t>
-
-<ul spacing="compact">
-<li><t>Process ID</t>
-
-<ul spacing="compact">
-<li>Identifier: processId</li>
-<li>Cardinality: 0-1</li>
-<li>Mutability: read-only</li>
-<li>Data Type: String</li>
-<li>Description: A server-assigned identifier of the process instance, unique within the scope of the Owner Data Object.</li>
-<li>Constraints: The value is set by the server and cannot be specified by the client.</li>
-</ul></li>
-</ul></li>
-</ul>
-
-<section anchor="operations-1"><name>Operations</name>
-
-<section anchor="create-request-1"><name>Create (Request)</name>
-
-<ul>
-<li>Identifier: create</li>
-<li>Input: Authorisation Process Object (create-only and read-write elements)</li>
-<li><t>Output: Authorisation Process Object</t>
-</li>
-<li><t>Authorisation:</t>
-
-<ul spacing="compact">
-<li>Inherited from the resource object create operation that initiates this process.</li>
-</ul></li>
-</ul>
-<t>The following transient data elements are defined for this operation:</t>
-
-<ul spacing="compact">
-<li><t>Signatures</t>
-
-<ul spacing="compact">
-<li>Identifier: signatures</li>
-<li>Cardinality: 0+</li>
-<li>Mutability: read-write</li>
-<li>Data Type: Signature Object</li>
-<li>Description: The digital signatures of the authorisation request, used to verify the authenticity and integrity of the request.</li>
-<li>Constraints: (none)</li>
-</ul></li>
-</ul>
-</section>
-
-<section anchor="read-1"><name>Read</name>
-<t><strong>TODO</strong></t>
-</section>
-
-<section anchor="update-decision-1"><name>Update (Decision)</name>
-<t>The following transient data elements are defined for this operation:</t>
-
-<ul spacing="compact">
-<li><t>Signatures</t>
-
-<ul spacing="compact">
-<li>Identifier: signatures</li>
-<li>Cardinality: 0+</li>
-<li>Mutability: read-write</li>
-<li>Data Type: Signature Object</li>
-<li>Description: The digital signatures of the authorisation request, used to verify the authenticity and integrity of the request.</li>
-<li>Constraints: (none)</li>
-</ul></li>
-<li><t>Approval</t>
-
-<ul spacing="compact">
-<li>Identifier: approval</li>
-<li>Cardinality: 0-1</li>
-<li>Mutability: read-write</li>
-<li>Data Type: Approval Object</li>
-<li>Description: The approval status of the authorisation request, used to verify the consent of the approving party.</li>
-<li>Constraints: (none)</li>
-</ul></li>
-</ul>
-<t><strong>TODO</strong></t>
-</section>
-
-<section anchor="delete-revoke-1"><name>Delete (Revoke)</name>
+<section anchor="authorisation-operations-1"><name>Authorisation Operations</name>
+<t>The Domain Name Data Object supports all the authorisation operations defined in <xref target="authorisation-operations"></xref>.</t>
 <t><strong>TODO</strong></t>
 </section>
 </section>
+</section>
+
+<section anchor="host-data-object"><name>Host Data Object</name>
+<t>The Host Data Object supports all the authorisation operations defined in <xref target="authorisation-operations"></xref>.</t>
+<t><strong>TODO</strong></t>
 </section>
 </section>
 
@@ -1442,7 +1453,136 @@ Registration procedure: Expert Review
 <td>Transfer a domain to another registrar</td>
 </tr>
 </tbody>
-</table><t><strong>TODO</strong></t>
+</table>
+<section anchor="rpp-data-object-registry"><name>RPP Data Object Registry</name>
+<t>This specification defines new entries in the &quot;RESTful Provisioning Protocol (RPP) Data Object Registry&quot; defined in <xref target="I-D.ietf-rpp-data-objects"></xref>.</t>
+<t>Object: authorisation</t>
+<t>Object Name: Authorisation Data Object</t>
+<t>Object Type: Resource</t>
+<t>Description: Represents the authorisation information for 3rd party access to a specific RPP operation on an object resource.</t>
+<t>Reference: [This-ID]</t>
+<t>Data Elements</t>
+<table>
+<thead>
+<tr>
+<th>Identifier</th>
+<th>Name</th>
+<th>Card.</th>
+<th>Mutability</th>
+<th>Data Type</th>
+<th>Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>transactionType</td>
+<td>Transaction Type</td>
+<td>1</td>
+<td>create-only</td>
+<td>String</td>
+<td>The type of transaction for the authorisation request, MUST be one of the values registered in the &quot;RPP Multi-Party Transaction Types&quot; registry <xref target="tbl-rpp-transaction-types"></xref>.</td>
+</tr>
+
+<tr>
+<td>timestamp</td>
+<td>Timestamp</td>
+<td>1</td>
+<td>create-only</td>
+<td>Timestamp</td>
+<td>The time the authorisation was created.</td>
+</tr>
+
+<tr>
+<td>expiration</td>
+<td>Expiry Time</td>
+<td>1</td>
+<td>create-only</td>
+<td>Timestamp</td>
+<td>The time the authorisation expires.</td>
+</tr>
+
+<tr>
+<td>objectId</td>
+<td>Object Identifier</td>
+<td>1</td>
+<td>create-only</td>
+<td>Identifier</td>
+<td>The identifier of the object the authorisation is associated with.</td>
+</tr>
+
+<tr>
+<td>requestorId</td>
+<td>Requestor Id</td>
+<td>1</td>
+<td>read-only</td>
+<td>Identifier</td>
+<td>The unique organisation identifier of the organisation that created the authorisation request.</td>
+</tr>
+
+<tr>
+<td>requestorName</td>
+<td>Requestor Name</td>
+<td>1</td>
+<td>read-only</td>
+<td>String</td>
+<td>The name of the organisation that created the authorisation request.</td>
+</tr>
+
+<tr>
+<td>approvalUrl</td>
+<td>Approval URL</td>
+<td>0-1</td>
+<td>read-write</td>
+<td>URI</td>
+<td>The URI to which the client should be redirected for approval.</td>
+</tr>
+
+<tr>
+<td>returnUrl</td>
+<td>Return URL</td>
+<td>0-1</td>
+<td>read-write</td>
+<td>URI</td>
+<td>The URI to which the client should be redirected after approval at the registrar is complete.</td>
+</tr>
+
+<tr>
+<td>usage</td>
+<td>Usage</td>
+<td>1</td>
+<td>create-only</td>
+<td>String</td>
+<td>The usage type for the authorisation request, one of <tt>&quot;single-use&quot;</tt> or <tt>&quot;multi-use&quot;</tt>.</td>
+</tr>
+
+<tr>
+<td>status</td>
+<td>Status</td>
+<td>1</td>
+<td>read-only</td>
+<td>Status Object</td>
+<td>The current lifecycle status of the authorisation, as described in <xref target="fig-authorisation-lifecycle"></xref>.</td>
+</tr>
+</tbody>
+</table><t>Operations</t>
+<t>Operation: Create</t>
+<t>Operation Identifier: create</t>
+<t>Description: Provisions a new Authorisation Data Object resource, initiating a multi-party authorization request.</t>
+<t>Parameters: (None)</t>
+<t>Operation: Read</t>
+<t>Operation Identifier: read</t>
+<t>Description: Retrieves the data elements of an existing Authorisation Data Object.</t>
+<t>Parameters: (None)</t>
+<t>Operation: Update</t>
+<t>Operation Identifier: update</t>
+<t>Description: Modifies the attributes of an existing Authorisation Data Object, used to record the registrar's decision on the authorisation request.</t>
+<t>Parameters: (None)</t>
+<t>Operation: Delete</t>
+<t>Operation Identifier: delete</t>
+<t>Description: Removes an existing Authorisation Data Object.</t>
+<t>Parameters: (None)</t>
+</section>
 </section>
 
 <section anchor="internationalization-considerations"><name>Internationalization Considerations</name>
