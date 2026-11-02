@@ -6,7 +6,7 @@ workgroup = "RESTful Provisioning Protocol"
 keyword = ["RPP", "RESTful Provisioning Protocol", "authorization", "multi-party"]
 submissiontype = "IETF"
 TocDepth = 4
-date = 2026-11-14
+date = 2026-11-02
 
 [seriesInfo]
 name = "Internet-Draft"
