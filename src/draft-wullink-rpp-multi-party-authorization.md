@@ -38,15 +38,13 @@ organization = "DENIC"
 
 .# Abstract
 
-The traditional Registry, Registrar and Registrant (RRR) model for domain name management is evolving to include third-party service providers, such as DNS hosting providers. This document describes a generic multi-party authorization flow that allows registries to securely delegate domain management functions to accredited third-party service providers, while ensuring that the registrant's explicit consent is obtained before any RPP operations, described in [@!I-D.ietf-rpp-core], are executed.
-
-**TODO**
+The traditional Registry, Registrar and Registrant (RRR) model for domain name management is evolving to include third-party service providers, such as DNS hosting providers. This document describes a generic multi-party authorization flow that allows registries to securely delegate domain management functions to accredited third-party service providers, while ensuring that the registrant's explicit consent is obtained before any RPP operations are executed.
 
 {mainmatter}
 
 # Introduction
 
-The multi-party authorization process described in this document allows a registry to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrar and registrant's explicit consent is obtained before any RPP operations, described in [@!I-D.ietf-rpp-core], are executed. A third-party service provider MAY be used by a registrant for domain management functions, such as DNS hosting. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The third-party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties.
+The multi-party authorization process described in this document allows a registry to securely delegate RPP object operations to accredited third-party service providers, while ensuring that the registrar and registrant's explicit consent is obtained before any RPP operations are executed. A third-party service provider MAY be used by a registrant for domain management functions, such as DNS hosting. The registry and the 3rd party MUST have a pre-established trust relationship, how this trust is established is out of scope for this document. The third-party does not have a direct trust relationship with the registrar, but the registrar trusts the registry to only accept requests from accredited 3rd parties.
 
 # Terminology
 

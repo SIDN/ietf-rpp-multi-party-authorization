@@ -20,10 +20,7 @@ Abstract
    generic multi-party authorization flow that allows registries to
    securely delegate domain management functions to accredited third-
    party service providers, while ensuring that the registrant's
-   explicit consent is obtained before any RPP operations, described in
-   [I-D.ietf-rpp-core], are executed.
-
-   *TODO*
+   explicit consent is obtained before any RPP operations are executed.
 
 Status of This Memo
 
@@ -47,9 +44,12 @@ Copyright Notice
    Copyright (c) 2026 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
-   This document is subject to BCP 78 and the IETF Trust's Legal
-   Provisions Relating to IETF Documents (https://trustee.ietf.org/
-   license-info) in effect on the date of publication of this document.
+
+
+
+
+
+
 
 
 
@@ -58,6 +58,9 @@ Wullink & Kowalik          Expires 6 May 2027                   [Page 1]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
    Please review these documents carefully, as they describe your rights
    and restrictions with respect to this document.  Code Components
    extracted from this document must include Revised BSD License text as
@@ -103,9 +106,6 @@ Table of Contents
    6.  Request Processing  . . . . . . . . . . . . . . . . . . . . .  22
      6.1.  Third Party . . . . . . . . . . . . . . . . . . . . . . .  22
      6.2.  Registry  . . . . . . . . . . . . . . . . . . . . . . . .  22
-     6.3.  Registrar . . . . . . . . . . . . . . . . . . . . . . . .  23
-   7.  Authorisation Lifecycle . . . . . . . . . . . . . . . . . . .  23
-   8.  Request Signing and Verification  . . . . . . . . . . . . . .  26
 
 
 
@@ -114,6 +114,9 @@ Wullink & Kowalik          Expires 6 May 2027                   [Page 2]
 Internet-Draft      Multi-Party Authorization for RPP      November 2026
 
 
+     6.3.  Registrar . . . . . . . . . . . . . . . . . . . . . . . .  23
+   7.  Authorisation Lifecycle . . . . . . . . . . . . . . . . . . .  23
+   8.  Request Signing and Verification  . . . . . . . . . . . . . .  26
      8.1.  Public Keys . . . . . . . . . . . . . . . . . . . . . . .  26
        8.1.1.  JSON Schema . . . . . . . . . . . . . . . . . . . . .  27
      8.2.  Canonicalization and Signing Input  . . . . . . . . . . .  27
@@ -152,16 +155,13 @@ Internet-Draft      Multi-Party Authorization for RPP      November 2026
    allows a registry to securely delegate RPP object operations to
    accredited third-party service providers, while ensuring that the
    registrar and registrant's explicit consent is obtained before any
-   RPP operations, described in [I-D.ietf-rpp-core], are executed.  A
-   third-party service provider MAY be used by a registrant for domain
-   management functions, such as DNS hosting.  The registry and the 3rd
-   party MUST have a pre-established trust relationship, how this trust
-   is established is out of scope for this document.  The third-party
-   does not have a direct trust relationship with the registrar, but the
-   registrar trusts the registry to only accept requests from accredited
-   3rd parties.
-
-
+   RPP operations are executed.  A third-party service provider MAY be
+   used by a registrant for domain management functions, such as DNS
+   hosting.  The registry and the 3rd party MUST have a pre-established
+   trust relationship, how this trust is established is out of scope for
+   this document.  The third-party does not have a direct trust
+   relationship with the registrar, but the registrar trusts the
+   registry to only accept requests from accredited 3rd parties.
 
 
 
